@@ -1,17 +1,27 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRightCircle } from "lucide-react";
+import Link from "next/link";
 
-export default function Home() {
+export default function TrustMLLandingPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#0f0c29] via-[#302b63] to-[#24243e] text-white flex flex-col items-center px-6 pt-24 pb-16 relative overflow-hidden">
+    <main className="min-h-screen bg-gradient-to-b from-[#0f0c29] via-[#302b63] to-[#24243e] text-white flex flex-col items-center px-6 pt-0 pb-16 relative overflow-hidden">
       {/* Fancy Background Effect */}
       <div className="absolute inset-0 -z-10 pointer-events-none">
         <div className="absolute w-96 h-96 bg-pink-500/20 rounded-full blur-3xl top-[-5rem] left-[-5rem] animate-pulse"></div>
         <div className="absolute w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl bottom-[-5rem] right-[-5rem] animate-pulse"></div>
       </div>
 
-      <section className="text-center max-w-4xl">
+      {/* Header */}
+      <header className="w-full flex justify-between items-center py-6 px-4 md:px-10 text-white text-sm z-10">
+        <div className="text-lg font-bold tracking-wide">TrustML</div>
+        <nav className="flex gap-6">
+          <Link href="/docs" className="hover:text-cyan-300 transition-colors">Docs</Link>
+          <Link href="/dashboard" className="hover:text-pink-300 transition-colors">Dashboard</Link>
+        </nav>
+      </header>
+
+      <section className="text-center max-w-4xl pt-20">
         <h1 className="text-4xl md:text-6xl font-extrabold leading-tight">
           Build <span className="text-cyan-400">Trustable</span>, <span className="text-pink-400">Decentralized</span> AI
         </h1>
