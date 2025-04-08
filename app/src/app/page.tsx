@@ -48,7 +48,7 @@ export default function TrustMLLandingPage() {
         <div className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
           <Button
             size="lg"
-            className="group bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-semibold shadow-lg hover:shadow-xl hover:shadow-cyan-500/30 hover:from-cyan-400 hover:to-purple-500 transition-all duration-300 ease-in-out transform hover:-translate-y-0.5 w-full sm:w-auto"
+            className="group bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-semibold shadow-lg hover:from-cyan-400 hover:to-purple-500 transition-all duration-300 ease-in-out transform hover:-translate-y-0.5 w-full sm:w-auto"
             asChild
           >
             <Link href="/dashboard">
