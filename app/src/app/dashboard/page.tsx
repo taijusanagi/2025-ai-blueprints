@@ -201,13 +201,6 @@ const SessionDetail = ({ sessionData, onBack, copiedStates, setCopiedStates }: {
         );
     }
 
-    const exampleCode = `# Submit model update using SDK
-trustml submit --round ${sessionData.round} --weights model.h5 --meta '{
-  "worker": "0xabc123...",
-  "accuracy": 0.932 # Example accuracy
-}' --session-id ${sessionData.id}`; // Added session ID
-
-
     // Status color helper for detail view badges
     const getDetailStatusStyle = (status: SessionDetailData['status']) => {
         switch (status) {
@@ -379,7 +372,7 @@ export default function DashboardPage() {
                         TrustML
                     </Link>
                     <nav className="flex gap-5 sm:gap-6 text-sm font-medium">
-                        <a href="https://github.com/taijusanagi/2025-ai-blueprints" target="_blank" className="text-slate-300 hover:text-cyan-400 transition-colors duration-200">Docs</a>
+                        <Link href="https://github.com/taijusanagi/2025-ai-blueprints" target="_blank" className="text-slate-300 hover:text-cyan-400 transition-colors duration-200" rel="noopener noreferrer">Docs</Link>
                         <Link href="/dashboard" className="text-pink-400">Dashboard</Link>
                     </nav>
                 </div>
