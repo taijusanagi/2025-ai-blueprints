@@ -14,10 +14,12 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "TrustML – Verifiable Federated Learning",
-  description: "TrustML enables decentralized, verifiable training using Filecoin, smart contracts, and Merkle proofs.",
+  description:
+    "TrustML enables decentralized, verifiable training using Filecoin, smart contracts, and Merkle proofs.",
   openGraph: {
     title: "TrustML – Verifiable Federated Learning",
-    description: "Train ML models across multiple nodes with trust. Powered by Filecoin.",
+    description:
+      "Train ML models across multiple nodes with trust. Powered by Filecoin.",
     images: [
       {
         url: "/ogp.png", // Make sure this file exists in your public/ directory
@@ -31,11 +33,11 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "TrustML – Verifiable Federated Learning",
-    description: "Train ML models across multiple nodes with trust. Powered by Filecoin.",
+    description:
+      "Train ML models across multiple nodes with trust. Powered by Filecoin.",
     images: ["/ogp.png"],
   },
 };
-
 
 export default function RootLayout({
   children,

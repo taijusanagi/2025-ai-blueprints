@@ -1,4 +1,5 @@
 # TrustML
+
 Verifiable Federated Learning with Filecoin
 
 ## 🔥 Project Summary
@@ -92,4 +93,3 @@ This project is built for the "Hack the Data Layer for AI" track:
 
 This project is made possible by Encode Club & Filecoin ecosystem.
 Let's make federated learning trustable, decentralized, and open.
-
