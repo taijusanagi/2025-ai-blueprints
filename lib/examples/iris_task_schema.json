@@ -1,0 +1,10 @@
+{
+  "task": "iris",
+  "features": ["sepal_length", "sepal_width", "petal_length", "petal_width"],
+  "input_shape": [4],
+  "num_classes": 3,
+  "model_architecture": [
+    {"type": "Dense", "units": 10, "activation": "relu"},
+    {"type": "Dense", "units": 3, "activation": "softmax"}
+  ]
+}
