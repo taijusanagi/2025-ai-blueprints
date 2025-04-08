@@ -31,7 +31,7 @@ export default function TrustMLLandingPage() {
             TrustML
           </Link>
           <nav className="flex gap-5 sm:gap-6 text-sm font-medium">
-            <Link href="/docs" className="text-slate-300 hover:text-cyan-400 transition-colors duration-200">Docs</Link>
+            <a href="https://github.com/taijusanagi/2025-ai-blueprints" target="_blank" className="text-slate-300 hover:text-cyan-400 transition-colors duration-200">Docs</a>
             <Link href="/dashboard" className="text-slate-300 hover:text-pink-400 transition-colors duration-200">Dashboard</Link>
           </nav>
         </div>
