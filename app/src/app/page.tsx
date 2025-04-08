@@ -1,121 +1,177 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRightCircle } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card"; // Assuming Card/CardContent are simple wrappers like divs
+import { ArrowRightCircle, ShieldCheck, GitBranch, DatabaseZap, ClipboardCopy } from "lucide-react";
 import Link from "next/link";
 
 export default function TrustMLLandingPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#0f0c29] via-[#302b63] to-[#24243e] text-white flex flex-col items-center px-6 pt-0 pb-16 relative overflow-hidden">
-      {/* Fancy Background Effect */}
-      <div className="absolute inset-0 -z-10 pointer-events-none">
-        <div className="absolute w-96 h-96 bg-pink-500/20 rounded-full blur-3xl top-[-5rem] left-[-5rem] animate-pulse"></div>
-        <div className="absolute w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl bottom-[-5rem] right-[-5rem] animate-pulse"></div>
+    // --- Main Container ---
+    <main className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-black text-slate-200 flex flex-col items-center px-4 sm:px-6 pt-0 pb-16 relative overflow-x-hidden">
+
+      {/* --- Background Effects --- */}
+      <div aria-hidden="true" className="absolute inset-0 -z-10 pointer-events-none">
+        {/* Subtle Grid Pattern */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(100,116,139,0.05)_1px,_transparent_1px)] [background-size:32px_32px]"></div>
+        {/* Animated Blobs */}
+        <div className="absolute w-72 h-72 md:w-96 md:h-96 bg-cyan-600/10 rounded-full blur-3xl filter top-[-6rem] left-[-6rem] animate-pulse duration-3000 opacity-70"></div>
+        <div className="absolute w-72 h-72 md:w-96 md:h-96 bg-purple-600/10 rounded-full blur-3xl filter bottom-[-6rem] right-[-6rem] animate-pulse duration-4000 opacity-70"></div>
       </div>
 
-      {/* Header */}
-      <header className="w-full flex justify-between items-center py-6 px-4 md:px-10 text-white text-sm z-10">
-        <div className="text-lg font-bold tracking-wide">TrustML</div>
-        <nav className="flex gap-6">
-          <Link href="/docs" className="hover:text-cyan-300 transition-colors">Docs</Link>
-          <Link href="/dashboard" className="hover:text-pink-300 transition-colors">Dashboard</Link>
-        </nav>
+      {/* --- Header --- */}
+      <header className="w-full sticky top-0 z-50 backdrop-blur-lg bg-slate-900/75 border-b border-slate-700/50">
+        <div className="max-w-7xl mx-auto flex justify-between items-center py-4 px-4 sm:px-6 lg:px-8">
+          <Link href="/" className="text-xl font-semibold tracking-tight text-white hover:text-cyan-300 transition-colors duration-200">
+            TrustML
+          </Link>
+          <nav className="flex gap-5 sm:gap-6 text-sm font-medium">
+            <Link href="/docs" className="text-slate-300 hover:text-cyan-400 transition-colors duration-200">Docs</Link>
+            <Link href="/dashboard" className="text-slate-300 hover:text-pink-400 transition-colors duration-200">Dashboard</Link>
+          </nav>
+        </div>
       </header>
 
-      <section className="text-center max-w-4xl pt-20">
-        <h1 className="text-4xl md:text-6xl font-extrabold leading-tight">
+      {/* --- Hero Section --- */}
+      <section className="text-center max-w-4xl pt-24 md:pt-32 z-10">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400">
           Build <span className="text-cyan-400">Trustable</span>, <span className="text-pink-400">Decentralized</span> AI
         </h1>
-        <p className="mt-6 text-lg md:text-xl text-gray-300 max-w-2xl mx-auto">
-          TrustML lets multiple nodes train ML models with verified contributions. Powered by Filecoin, Merkle trees, and smart contracts.
+        <p className="mt-6 text-lg md:text-xl text-slate-400 max-w-2xl mx-auto">
+          TrustML enables verifiable, multi-node machine learning model training, secured by Filecoin, Merkle proofs, and smart contracts.
         </p>
-        <div className="mt-10 flex justify-center gap-4">
-          <Button size="lg" className="bg-gradient-to-r from-cyan-400 to-purple-500 text-black font-semibold shadow-lg hover:from-cyan-300 hover:to-purple-400 transition-transform hover:scale-105">
-            Launch Dashboard <ArrowRightCircle className="ml-2 h-5 w-5" />
+        <div className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
+          <Button
+            size="lg"
+            className="group bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-semibold shadow-lg hover:shadow-xl hover:shadow-cyan-500/30 hover:from-cyan-400 hover:to-purple-500 transition-all duration-300 ease-in-out transform hover:-translate-y-0.5 w-full sm:w-auto"
+            asChild // Use asChild if Button wraps a Link
+          >
+            <Link href="/dashboard">
+              Launch Dashboard
+              <ArrowRightCircle className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
           </Button>
-          <Button size="lg" className="border border-white text-white hover:bg-white hover:text-black transition-all hover:scale-105">
-            GitHub
+          <Button
+            size="lg"
+            variant="outline"
+            className="bg-transparent border border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white hover:border-slate-500 transition-all duration-300 ease-in-out transform hover:-translate-y-0.5 w-full sm:w-auto"
+            asChild
+          >
+             <Link href="https://github.com" target="_blank" rel="noopener noreferrer"> {/* Replace with actual GitHub link */}
+               GitHub
+             </Link>
           </Button>
         </div>
       </section>
 
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-20 max-w-5xl w-full">
-        <Card className="bg-white/5 backdrop-blur-md border border-white/10 transition-transform hover:scale-105">
-          <CardContent className="p-6">
-            <h2 className="text-xl font-bold text-white mb-2">🔐 Verifiable Training</h2>
-            <p className="text-gray-200">Each model update is signed, hashed, and stored on-chain and on Filecoin.</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-white/5 backdrop-blur-md border border-white/10 transition-transform hover:scale-105">
-          <CardContent className="p-6">
-            <h2 className="text-xl font-bold text-white mb-2">🌍 Federated Averaging</h2>
-            <p className="text-gray-200">TrustML uses FedAvg to combine only verified contributions across nodes.</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-white/5 backdrop-blur-md border border-white/10 transition-transform hover:scale-105">
-          <CardContent className="p-6">
-            <h2 className="text-xl font-bold text-white mb-2">📦 Powered by Filecoin</h2>
-            <p className="text-gray-200">Model weights and metadata are stored on decentralized storage for auditability.</p>
-          </CardContent>
-        </Card>
+      {/* --- Features Section --- */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mt-24 md:mt-32 max-w-6xl w-full z-10">
+        {[
+          { icon: ShieldCheck, title: "Verifiable Training", description: "Each model update is signed, cryptographically hashed, and anchored on-chain & Filecoin." },
+          { icon: GitBranch, title: "Federated Averaging", description: "Utilizes FedAvg algorithm to securely aggregate verified model contributions across nodes." },
+          { icon: DatabaseZap, title: "Powered by Filecoin", description: "Leverages decentralized storage for robust model weight and metadata persistence and auditability." }
+        ].map((feature, index) => (
+          <Card key={index} className="group bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-lg transition-all duration-300 ease-in-out hover:border-slate-600 hover:bg-slate-800/60 hover:-translate-y-1 shadow-md hover:shadow-lg">
+            <CardContent className="p-6">
+              <feature.icon aria-hidden="true" className="w-8 h-8 mb-4 text-cyan-400 group-hover:scale-110 transition-transform duration-300" />
+              <h2 className="text-xl font-semibold text-white mb-2 transition-colors duration-300 group-hover:text-cyan-300">{feature.title}</h2>
+              <p className="text-slate-400 text-sm">{feature.description}</p>
+            </CardContent>
+          </Card>
+        ))}
       </section>
 
-      <section className="mt-28 text-center">
-        <h3 className="text-2xl font-semibold mb-4 text-white">🧪 Try It in Your Project</h3>
-        <p className="text-gray-300 mb-4">Install the SDK and start verifying your federated training jobs:</p>
-        <div className="relative inline-block bg-black/30 border border-white/20 px-6 py-4 rounded text-green-400 font-mono text-sm text-left shadow-lg">
-          <div className="absolute top-0 left-0 w-[2px] h-full bg-green-400 animate-blink"></div>
-          <code className="whitespace-nowrap">
-            <span className="animate-typewriter">pip install trustml</span>
+      {/* --- Call to Action / Installation --- */}
+      <section className="mt-24 md:mt-32 text-center max-w-3xl w-full z-10">
+        <h3 className="text-3xl font-bold mb-4 text-white">Get Started with TrustML</h3>
+        <p className="text-slate-400 mb-6">Integrate verifiable federated learning into your project with our SDK.</p>
+        <div className="relative bg-slate-900 border border-slate-700 rounded-lg p-6 font-mono text-sm shadow-xl max-w-md mx-auto">
+          {/* Terminal Window Bar */}
+          <div className="absolute top-3 left-4 flex space-x-1.5">
+              <span className="w-3 h-3 rounded-full bg-red-500"></span>
+              <span className="w-3 h-3 rounded-full bg-yellow-500"></span>
+              <span className="w-3 h-3 rounded-full bg-green-500"></span>
+          </div>
+          {/* Copy Button (Visual Only) */}
+           <button aria-label="Copy code" className="absolute top-3 right-3 p-1.5 bg-slate-700 rounded-md text-slate-400 hover:text-white hover:bg-slate-600 transition-colors duration-200">
+              <ClipboardCopy className="w-4 h-4" />
+           </button>
+           {/* Code Content */}
+          <code className="block text-left mt-6 text-green-400 whitespace-nowrap overflow-x-auto">
+            <span className="text-slate-500 mr-2">$</span>pip install trustml
           </code>
         </div>
       </section>
 
-      <section className="mt-20 max-w-6xl w-full">
-        <h3 className="text-2xl font-semibold mb-4 text-white text-center">🚀 See How TrustML Works with TensorFlow</h3>
-        <div className="flex flex-col lg:flex-row gap-8 items-center">
+      {/* --- How It Works Section (Diagram & Code) --- */}
+      <section className="mt-24 md:mt-32 max-w-6xl w-full z-10">
+        <h3 className="text-3xl font-bold mb-10 text-white text-center">How TrustML Works with TensorFlow</h3>
+        <div className="flex flex-col lg:flex-row gap-10 lg:gap-12 items-start">
 
-          {/* Diagram Image */}
-          <div className="lg:w-1/2 w-full flex justify-center">
-            <img
-              src="/diagram.png"
-              alt="TrustML Diagram"
-              className="w-full max-w-md rounded-lg shadow-lg border border-white/10"
+          {/* Diagram Side */}
+          <div className="lg:w-1/2 w-full flex justify-center items-center flex-shrink-0">
+             {/* Placeholder - Replace with actual Image component or img tag */}
+             <img
+              src="/diagram.png" // Use a placeholder or your actual diagram path
+              alt="TrustML Architecture Diagram"
+              width={500}
+              height={400}
+              className="rounded-lg shadow-xl border border-slate-700/50 bg-slate-800/30 object-contain" // Added background for visibility if SVG/transparent
             />
           </div>
 
-          {/* Code Block */}
+          {/* Code Example Side */}
           <div className="lg:w-1/2 w-full">
-            <pre className="bg-black/40 rounded p-4 text-sm text-green-300 font-mono overflow-x-auto">
+            <div className="relative bg-slate-900/80 backdrop-blur-sm border border-slate-700 rounded-lg shadow-xl font-mono text-sm">
+              {/* Code Block Header */}
+               <div className="flex items-center justify-between px-4 py-2 border-b border-slate-700">
+                  <span className="text-xs text-slate-400">example.py</span>
+                  <button aria-label="Copy code" className="p-1.5 bg-slate-700 rounded-md text-slate-400 hover:text-white hover:bg-slate-600 transition-colors duration-200">
+                      <ClipboardCopy className="w-4 h-4" />
+                  </button>
+               </div>
+              {/* Code Content Area */}
+              <pre className="p-4 text-slate-300 overflow-x-auto">
 {`import trustml
 import tensorflow as tf
 
-# Define your local model
+# 1. Define your local model architecture
 model = tf.keras.models.Sequential([
-    tf.keras.layers.Dense(64, activation='relu'),
-    tf.keras.layers.Dense(10, activation='softmax')
+  tf.keras.layers.Dense(64, activation='relu'),
+  tf.keras.layers.Dense(10, activation='softmax')
 ])
 
-# Load your local data
-x_train, y_train = trustml.utils.load_partition("node1")
+# 2. Load node-specific training data
+(x_train, y_train), _ = trustml.load_partition("node-01")
 
-# Train locally
-model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-model.fit(x_train, y_train, epochs=1)
+# 3. Compile and train locally
+model.compile(
+  optimizer='adam',
+  loss='sparse_categorical_crossentropy',
+  metrics=['accuracy']
+)
+model.fit(x_train, y_train, epochs=1, verbose=0)
 
-# Submit weights to aggregator
-trustml.submit_update(model.get_weights())
+# 4. Securely submit weights for aggregation
+# (Handles hashing, signing, Filecoin upload)
+cid = trustml.submit_update(model.get_weights())
+print(f"Update submitted. CID: {cid}")
 
-# Fetch global model after FedAvg
+# 5. Fetch verified global model (post-FedAvg)
 global_weights = trustml.fetch_global_model()
-model.set_weights(global_weights)`}
-            </pre>
+if global_weights:
+  model.set_weights(global_weights)
+  print("Global model weights applied.")
+`}
+              </pre>
+            </div>
           </div>
         </div>
       </section>
 
-      <footer className="mt-24 text-sm text-gray-400">
-        Made for the Filecoin AI Blueprints Hackathon · 2025
+      {/* --- Footer --- */}
+      <footer className="mt-28 md:mt-36 text-center text-sm text-slate-500 z-10 pb-8">
+        Made for the Filecoin AI Blueprints Hackathon · &copy; {new Date().getFullYear()} TrustML Contributors
       </footer>
+
     </main>
   );
 }
