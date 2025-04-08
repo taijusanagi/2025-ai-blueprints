@@ -1,6 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRightCircle, ShieldCheck, GitBranch, DatabaseZap, ClipboardCopy } from "lucide-react";
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { atomDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+
 import Link from "next/link";
 
 export default function TrustMLLandingPage() {
@@ -134,7 +137,11 @@ export default function TrustMLLandingPage() {
                   </button>
                </div>
               {/* Code Content Area */}
-              <pre className="p-4 text-slate-300 overflow-x-auto">
+              <SyntaxHighlighter
+                language="python"
+                style={atomDark}
+                customStyle={{ margin: 0, padding: '1rem', backgroundColor: 'transparent' }}
+              >
 {`import trustml
 import tensorflow as tf
 
@@ -166,7 +173,7 @@ if global_weights:
   model.set_weights(global_weights)
   print("Global model weights applied.")
 `}
-              </pre>
+              </SyntaxHighlighter>
             </div>
           </div>
         </div>
