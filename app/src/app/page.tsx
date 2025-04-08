@@ -70,9 +70,22 @@ export default function TrustMLLandingPage() {
         </div>
       </section>
 
-      <section className="mt-20 max-w-4xl text-left">
-        <h3 className="text-2xl font-semibold mb-4 text-white text-center">🚀 Example: Using TrustML with TensorFlow</h3>
-        <pre className="bg-black/40 rounded p-4 text-sm text-green-300 font-mono overflow-x-auto">
+      <section className="mt-20 max-w-6xl w-full">
+        <h3 className="text-2xl font-semibold mb-4 text-white text-center">🚀 See How TrustML Works with TensorFlow</h3>
+        <div className="flex flex-col lg:flex-row gap-8 items-center">
+
+          {/* Diagram Image */}
+          <div className="lg:w-1/2 w-full flex justify-center">
+            <img
+              src="/diagram.png"
+              alt="TrustML Diagram"
+              className="w-full max-w-md rounded-lg shadow-lg border border-white/10"
+            />
+          </div>
+
+          {/* Code Block */}
+          <div className="lg:w-1/2 w-full">
+            <pre className="bg-black/40 rounded p-4 text-sm text-green-300 font-mono overflow-x-auto">
 {`import trustml
 import tensorflow as tf
 
@@ -95,7 +108,9 @@ trustml.submit_update(model.get_weights())
 # Fetch global model after FedAvg
 global_weights = trustml.fetch_global_model()
 model.set_weights(global_weights)`}
-        </pre>
+            </pre>
+          </div>
+        </div>
       </section>
 
       <footer className="mt-24 text-sm text-gray-400">
