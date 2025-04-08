@@ -109,39 +109,46 @@ export default function TrustMLLandingPage() {
       </section>
 
       {/* --- How It Works Section (Diagram & Code) --- */}
-      <section className="mt-24 md:mt-32 max-w-6xl w-full z-10 px-4">
-        <h3 className="text-3xl font-bold mb-10 text-white text-center">How TrustML Works with TensorFlow</h3>
-        <div className="flex flex-col lg:flex-row gap-10 lg:gap-12 items-start">
+      <section className="mt-24 md:mt-32 max-w-6xl w-full z-10 px-4 mx-auto">
+  <h3 className="text-3xl font-bold mb-10 text-white text-center">
+    How TrustML Works with TensorFlow
+  </h3>
 
-          {/* Diagram Side */}
-          <div className="lg:w-1/2 w-full flex justify-center items-center flex-shrink-0">
-             <img
-              src="/diagram.png"
-              alt="TrustML Architecture Diagram"
-              width={500}
-              height={400}
-              loading="lazy"
-              className="rounded-lg shadow-xl border border-slate-700/50 bg-slate-800/30 object-contain"
-            />
-          </div>
+  <div className="flex flex-col lg:flex-row gap-10 lg:gap-12 items-center justify-center">
+    {/* Diagram Side */}
+    <div className="lg:w-1/2 w-full flex justify-center items-center flex-shrink-0">
+      <img
+        src="/diagram.png"
+        alt="TrustML Architecture Diagram"
+        width={500}
+        height={400}
+        loading="lazy"
+        className="rounded-lg shadow-xl border border-slate-700/50 bg-slate-800/30 object-contain"
+      />
+    </div>
 
-          {/* Code Example Side */}
-          <div className="lg:w-1/2 w-full">
-            <div className="relative bg-slate-900 border border-slate-700 rounded-lg shadow-xl font-mono text-sm">
-              {/* Code Block Header */}
-               <div className="flex items-center justify-between px-4 py-2 border-b border-slate-700">
-                  <span className="text-xs text-slate-400">example.py</span>
-                  {/* Copy Button */}
-                  <button aria-label="Copy code" className="p-1.5 bg-slate-700 rounded-md text-slate-400 hover:text-white hover:bg-slate-600 transition-colors duration-200">
-                      <ClipboardCopy className="w-4 h-4" />
-                  </button>
-               </div>
-              {/* Code Content Area */}
-              <SyntaxHighlighter
-                language="python"
-                style={atomDark}
-                customStyle={{ margin: 0, padding: '1rem', backgroundColor: 'transparent' }}
-              >
+    {/* Code Example Side */}
+    <div className="lg:w-1/2 w-full">
+      <div className="relative bg-slate-900 border border-slate-700 rounded-lg shadow-xl font-mono text-sm">
+        <div className="flex items-center justify-between px-4 py-2 border-b border-slate-700">
+          <span className="text-xs text-slate-400">example.py</span>
+          <button
+            aria-label="Copy code"
+            className="p-1.5 bg-slate-700 rounded-md text-slate-400 hover:text-white hover:bg-slate-600 transition-colors duration-200"
+          >
+            <ClipboardCopy className="w-4 h-4" />
+          </button>
+        </div>
+
+        <SyntaxHighlighter
+          language="python"
+          style={atomDark}
+          customStyle={{
+            margin: 0,
+            padding: '1rem',
+            backgroundColor: 'transparent',
+          }}
+        >
 {`import trustml
 import tensorflow as tf
 
@@ -163,7 +170,6 @@ model.compile(
 model.fit(x_train, y_train, epochs=1, verbose=0)
 
 # 4. Securely submit weights for aggregation
-# (Handles hashing, signing, Filecoin upload)
 cid = trustml.submit_update(model.get_weights())
 print(f"Update submitted. CID: {cid}")
 
@@ -173,11 +179,12 @@ if global_weights:
   model.set_weights(global_weights)
   print("Global model weights applied.")
 `}
-              </SyntaxHighlighter>
-            </div>
-          </div>
-        </div>
-      </section>
+        </SyntaxHighlighter>
+      </div>
+    </div>
+  </div>
+</section>
+
 
       {/* --- Footer --- */}
       <footer className="mt-28 md:mt-36 text-center text-sm text-slate-500 z-10 pb-8">
