@@ -13,45 +13,30 @@ In federated learning, multiple participants contribute to a shared model withou
 
 TrustML solves this by combining:
 
-Federated Averaging (FedAvg) to merge decentralized model updates
-
-Digital signatures and hashing to verify integrity of each model update
-
-Merkle Trees to anchor all updates per training round
-
-Filecoin/IPFS to store model weights and metadata
-
-Smart contracts to store proof of contributions
-
-Only verified updates are included in the aggregation, ensuring the global model is tamper-resistant and auditable.
+- Federated Averaging (FedAvg) to merge decentralized model updates
+- Digital signatures and hashing to verify integrity of each model update
+- Merkle Trees to anchor all updates per training round
+- Filecoin/IPFS to store model weights and metadata
+- Smart contracts to store proof of contributions
+- Only verified updates are included in the aggregation, ensuring the global model is tamper-resistant and auditable.
 
 ## 🧠 Key Features
 
-Decentralized Training: Each node trains on local data
-
-On-chain Verification: Smart contract stores update hashes and Merkle roots
-
-Storage on Filecoin: All model weights + metadata CIDs stored on Filecoin
-
-Trustable Aggregation: Only verified weights are included in FedAvg
-
-Dashboard: Visualizes updates, training rounds, and lineage
+- Decentralized Training: Each node trains on local data
+- On-chain Verification: Smart contract stores update hashes and Merkle roots
+- Storage on Filecoin: All model weights + metadata CIDs stored on Filecoin
+- Trustable Aggregation: Only verified weights are included in FedAvg
+- Dashboard: Visualizes updates, training rounds, and lineage
 
 ## 🎯 Use Case: Federated + Verifiable Training
 
-Nodes train locally on private datasets
-
-Nodes hash + sign their model weights
-
-Nodes upload models to Filecoin/IPFS
-
-Smart contract stores CID + hash + signature + Merkle root
-
-Aggregator verifies all updates
-
-FedAvg is performed on verified models
-
-Final model is stored and published to Filecoin
+- Nodes train locally on private datasets
+- Nodes hash + sign their model weights
+- Nodes upload models to Filecoin/IPFS
+- Smart contract stores CID + hash + signature + Merkle root
+- Aggregator verifies all updates
+- FedAvg is performed on verified models
+- Final model is stored and published to Filecoin
 
 ## 🧱 Example Metadata (Stored in Filecoin)
 
@@ -68,25 +53,18 @@ Final model is stored and published to Filecoin
 
 ## 🛠 Architecture
 
-Python SDK for training, hashing, signing, uploading
-
-Merkle tree aggregator and verifier
-
-Smart contract (Solidity) for proof registry
-
-IPFS for data storage
-
-Frontend dashboard (Next.js or Streamlit)
+- Python SDK for training, hashing, signing, uploading
+- Merkle tree aggregator and verifier
+- Smart contract (Solidity) for proof registry
+- IPFS for data storage
+- Frontend dashboard (Next.js)
 
 ## 🚀 Tech Stack
 
-Python (training, aggregation)
-
-Solidity (TrustML smart contract)
-
-IPFS + Web3.Storage (Filecoin backend)
-
-Next.js (dashboard UI)
+- Python (training, aggregation)
+- Solidity (TrustML smart contract)
+- IPFS + Web3.Storage (Filecoin backend)
+- Next.js (dashboard UI)
 
 ## 🏆 Prize Fit
 
