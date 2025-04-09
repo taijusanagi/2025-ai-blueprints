@@ -3,8 +3,8 @@ SDK for Federated Learning with IPFS and Filecoin integration.
 
 This module provides functionality to:
 1. Upload schema to IPFS
-2. Upload tasks to Filecoin smart contracts
-3. Integrate with TensorFlow models
+2. Create tasks and submit models to Filecoin smart contracts
+3. Integrate with TensorFlow models for federated averaging
 """
 
 import json
@@ -17,7 +17,7 @@ import numpy as np
 
 
 class FederatedLearningSDK:
-    """SDK for Federated Learning with IPFS and Filecoin integration."""
+    """Streamlined SDK for Federated Learning with IPFS and Filecoin integration."""
     
     def __init__(self, ipfs_api="/ip4/127.0.0.1/tcp/5001", filecoin_rpc="http://localhost:8545", 
                  contract_address=None, contract_abi=None):
@@ -65,123 +65,244 @@ class FederatedLearningSDK:
             self.web3 = None
             self.contract = None
     
-    def upload_schema_to_ipfs(self, schema):
+    # --- IPFS Operations ---
+    
+    def upload_to_ipfs(self, content, is_file=False):
         """
-        Upload a schema to IPFS.
+        Upload content to IPFS.
         
         Args:
-            schema (dict): The schema to upload
+            content: Content to upload (string or file path)
+            is_file (bool): Whether content is a file path
             
         Returns:
-            str: IPFS hash of the uploaded schema
+            str: IPFS hash of the uploaded content
         """
         if not self.ipfs_client:
             raise ConnectionError("IPFS client not initialized")
             
-        # Convert schema to JSON string
-        schema_json = json.dumps(schema)
-        
-        # Upload to IPFS
-        result = self.ipfs_client.add_str(schema_json)
-        print(f"Schema uploaded to IPFS with hash: {result}")
-        
-        return result
+        if is_file:
+            with open(content, 'rb') as f:
+                result = self.ipfs_client.add(f)
+                return result['Hash']
+        else:
+            # Assume content is a string or JSON
+            if isinstance(content, dict):
+                content = json.dumps(content)
+            return self.ipfs_client.add_str(content)
     
-    def upload_task_to_filecoin(self, task_id, schema_hash, reward=0):
+    def download_from_ipfs(self, content_hash, output_path=None):
         """
-        Upload a task to the Filecoin smart contract.
+        Download content from IPFS.
         
         Args:
-            task_id (str): Unique identifier for the task
-            schema_hash (str): IPFS hash of the task schema
-            reward (int): Reward amount for completing the task
+            content_hash (str): IPFS hash of the content
+            output_path (str): Path to save the content (for files)
+            
+        Returns:
+            Content or path to downloaded file
+        """
+        if not self.ipfs_client:
+            raise ConnectionError("IPFS client not initialized")
+        
+        if output_path:
+            # Download as file
+            self.ipfs_client.get(content_hash)
+            # Move to desired location
+            os.rename(content_hash, output_path)
+            return output_path
+        else:
+            # Return as data
+            return self.ipfs_client.cat(content_hash)
+    
+    # --- Aggregator Operations ---
+    
+    def create_task(self, schema, task_id=None):
+        """
+        Create a task and upload it to the Filecoin smart contract.
+        
+        Args:
+            schema (dict): The task schema (model architecture, etc.)
+            task_id (str, optional): Custom task ID, generated if not provided
+            
+        Returns:
+            dict: Task information including IDs and hashes
+        """
+        if not self.web3 or not self.contract:
+            raise ConnectionError("Web3 or contract not initialized")
+        
+        # Generate task ID if not provided
+        if not task_id:
+            task_id = f"task_{int(time.time())}"
+        
+        # Upload schema to IPFS
+        schema_hash = self.upload_to_ipfs(schema)
+        
+        # Get account to use
+        account = self.web3.eth.accounts[0]
+        
+        # Create task on the blockchain
+        tx_hash = self.contract.functions.createTask(
+            task_id,
+            schema_hash
+        ).transact({'from': account})
+        
+        # Wait for transaction to be mined
+        receipt = self.web3.eth.wait_for_transaction_receipt(tx_hash)
+        
+        return {
+            "task_id": task_id,
+            "schema_hash": schema_hash,
+            "tx_hash": receipt.transactionHash.hex()
+        }
+    
+    def aggregate_models(self, task_id, output_file="aggregated_model.h5"):
+        """
+        Fetch all model submissions for a task and perform federated averaging.
+        
+        Args:
+            task_id (str): ID of the task
+            output_file (str): Path to save the aggregated model weights
+            
+        Returns:
+            str: Path to the aggregated model weights file
+        """
+        # Get all tasks
+        all_tasks = self.contract.functions.getTasks().call()
+        
+        # Find the specific task and its submissions
+        task_data = None
+        for task in all_tasks:
+            if task[0] == task_id:  # task_id is the first element
+                task_data = {
+                    "task_id": task[0],
+                    "schema_hash": task[1],
+                    "creator": task[2],
+                    "timestamp": task[3],
+                    "submissions": []
+                }
+                
+                # Extract submissions if any
+                if len(task) > 4 and task[4]:
+                    for submission in task[4]:
+                        task_data["submissions"].append({
+                            "model_hash": submission[0],
+                            "submitter": submission[1],
+                            "timestamp": submission[2]
+                        })
+                break
+        
+        if not task_data:
+            raise ValueError(f"Task {task_id} not found")
+        
+        if not task_data["submissions"]:
+            raise ValueError(f"No submissions found for task {task_id}")
+            
+        # Get the schema to build the model
+        schema_json = self.download_from_ipfs(task_data["schema_hash"])
+        schema = json.loads(schema_json)
+        
+        # Build model from schema
+        model = self._build_model_from_schema(schema)
+        
+        # Download and collect all model weights
+        all_weights = []
+        temp_dir = f"temp_models_{task_id}"
+        os.makedirs(temp_dir, exist_ok=True)
+        
+        for i, submission in enumerate(task_data["submissions"]):
+            model_hash = submission["model_hash"]
+            temp_file = os.path.join(temp_dir, f"model_{i}.h5")
+            
+            # Download model weights
+            self.download_from_ipfs(model_hash, temp_file)
+            
+            # Load weights and collect
+            model.load_weights(temp_file)
+            all_weights.append([layer.get_weights()[0] for layer in model.layers])
+        
+        # Perform federated averaging
+        averaged_weights = self._federated_average(all_weights)
+        
+        # Apply averaged weights to model
+        for i, layer in enumerate(model.layers):
+            layer.set_weights([averaged_weights[i]])
+        
+        # Save aggregated model
+        model.save_weights(output_file)
+        
+        # Clean up temp files
+        for file in os.listdir(temp_dir):
+            os.remove(os.path.join(temp_dir, file))
+        os.rmdir(temp_dir)
+        
+        return output_file
+    
+    # --- Node Operations ---
+    
+    def get_task_schema(self, task_id):
+        """
+        Get the schema for a specific task.
+        
+        Args:
+            task_id (str): The task ID
+            
+        Returns:
+            dict: The task schema
+        """
+        # Get all tasks
+        all_tasks = self.contract.functions.getTasks().call()
+        
+        # Find the specific task
+        schema_hash = None
+        for task in all_tasks:
+            if task[0] == task_id:  # task_id is the first element
+                schema_hash = task[1]  # schema_hash is the second element
+                break
+        
+        if not schema_hash:
+            raise ValueError(f"Task {task_id} not found")
+        
+        # Get schema from IPFS
+        schema_json = self.download_from_ipfs(schema_hash)
+        
+        # Parse and return
+        return json.loads(schema_json)
+    
+    def submit_model(self, task_id, model_weights_file):
+        """
+        Submit trained model weights for a task.
+        
+        Args:
+            task_id (str): ID of the task to submit to
+            model_weights_file (str): Path to the saved weights file (.h5)
             
         Returns:
             str: Transaction hash
         """
         if not self.web3 or not self.contract:
             raise ConnectionError("Web3 or contract not initialized")
-            
-        # Get default account
+        
+        # Upload weights to IPFS
+        model_hash = self.upload_to_ipfs(model_weights_file, is_file=True)
+        
+        # Get account to use
         account = self.web3.eth.accounts[0]
         
-        # Upload task to smart contract
-        tx_hash = self.contract.functions.createTask(
+        # Submit to blockchain
+        tx_hash = self.contract.functions.submitModel(
             task_id,
-            schema_hash,
-            reward
-        ).transact({'from': account, 'value': reward})
+            model_hash
+        ).transact({'from': account})
         
         # Wait for transaction to be mined
         receipt = self.web3.eth.wait_for_transaction_receipt(tx_hash)
-        print(f"Task uploaded to Filecoin with tx hash: {receipt.transactionHash.hex()}")
         
         return receipt.transactionHash.hex()
     
-    def create_and_upload_task(self, task_schema, reward=0):
-        """
-        Create a task from schema and upload to IPFS and Filecoin.
-        
-        Args:
-            task_schema (dict): The task schema
-            reward (int): Reward amount for completing the task
-            
-        Returns:
-            dict: Task information including IPFS hash and transaction hash
-        """
-        # Generate a unique task ID
-        task_id = f"task_{int(time.time())}"
-        
-        # Upload schema to IPFS
-        schema_hash = self.upload_schema_to_ipfs(task_schema)
-        
-        # Upload task to Filecoin
-        tx_hash = self.upload_task_to_filecoin(task_id, schema_hash, reward)
-        
-        return {
-            "task_id": task_id,
-            "schema_hash": schema_hash,
-            "tx_hash": tx_hash
-        }
+    # --- Helper Methods ---
     
-    def get_task_schema_hash(self, task_id):
-        """
-        Fetch the schema IPFS hash for the given task from the smart contract.
-
-        Args:
-            task_id (str): The task ID
-
-        Returns:
-            str: IPFS hash of the task schema
-        """
-        if not self.contract:
-            raise ConnectionError("Smart contract not initialized")
-
-        schema_hash, _, _ = self.contract.functions.getTask(task_id).call()
-        return schema_hash
-    
-    def get_task_schema(self, schema_hash):
-        """
-        Get a task schema from IPFS.
-        
-        Args:
-            schema_hash (str): IPFS hash of the schema
-            
-        Returns:
-            dict: The task schema
-        """
-        if not self.ipfs_client:
-            raise ConnectionError("IPFS client not initialized")
-            
-        # Get schema from IPFS
-        schema_json = self.ipfs_client.cat(schema_hash)
-        
-        # Parse JSON
-        schema = json.loads(schema_json)
-        
-        return schema
-    
-    def build_model_from_schema(self, schema):
+    def _build_model_from_schema(self, schema):
         """
         Build a TensorFlow model from a schema.
         
@@ -191,11 +312,7 @@ class FederatedLearningSDK:
         Returns:
             tf.keras.Model: The built model
         """
-        # Create a sequential model
         model = tf.keras.Sequential()
-        
-        # Add input layer
-        input_shape = schema.get("input_shape", [])
         
         # Add layers according to the schema
         for layer_config in schema.get("model_architecture", []):
@@ -228,125 +345,7 @@ class FederatedLearningSDK:
         
         return model
     
-    def save_model_weights(self, model, filename="model_weights.h5"):
-        """
-        Save model weights to a file.
-        
-        Args:
-            model (tf.keras.Model): The model
-            filename (str): Output filename
-            
-        Returns:
-            str: Path to the saved weights file
-        """
-        model.save_weights(filename)
-        return filename
-    
-    def load_model_weights(self, model, filename="model_weights.h5"):
-        """
-        Load model weights from a file.
-        
-        Args:
-            model (tf.keras.Model): The model
-            filename (str): Input filename
-            
-        Returns:
-            tf.keras.Model: The model with loaded weights
-        """
-        model.load_weights(filename)
-        return model
-    
-    def upload_model_weights_to_ipfs(self, weights_file):
-        """
-        Upload model weights to IPFS.
-        
-        Args:
-            weights_file (str): Path to the weights file
-            
-        Returns:
-            str: IPFS hash of the uploaded weights
-        """
-        if not self.ipfs_client:
-            raise ConnectionError("IPFS client not initialized")
-            
-        # Upload to IPFS
-        with open(weights_file, 'rb') as f:
-            result = self.ipfs_client.add(f)
-            
-        print(f"Model weights uploaded to IPFS with hash: {result['Hash']}")
-        
-        return result['Hash']
-    
-    def download_model_weights_from_ipfs(self, weights_hash, output_file="downloaded_weights.h5"):
-        """
-        Download model weights from IPFS.
-        
-        Args:
-            weights_hash (str): IPFS hash of the weights
-            output_file (str): Output filename
-            
-        Returns:
-            str: Path to the downloaded weights file
-        """
-        if not self.ipfs_client:
-            raise ConnectionError("IPFS client not initialized")
-            
-        # Download from IPFS
-        self.ipfs_client.get(weights_hash)
-        
-        # Move to the desired location
-        os.rename(weights_hash, output_file)
-        
-        return output_file
-
-    def submit_model_to_filecoin(self, task_id, model_weights_file):
-        """
-        Submit trained model weights to the Filecoin smart contract.
-
-        Args:
-            task_id (str): ID of the task to submit to
-            model_weights_file (str): Path to the saved weights file (.h5)
-
-        Returns:
-            str: Transaction hash
-        """
-        if not self.web3 or not self.contract:
-            raise ConnectionError("Web3 or contract not initialized")
-
-        # Upload weights to IPFS
-        model_hash = self.upload_model_weights_to_ipfs(model_weights_file)
-
-        # Get default account
-        account = self.web3.eth.accounts[0]
-
-        # Submit the model hash to the smart contract
-        tx_hash = self.contract.functions.submitModel(
-            task_id,
-            model_hash
-        ).transact({'from': account})
-
-        receipt = self.web3.eth.wait_for_transaction_receipt(tx_hash)
-        print(f"Model submitted with tx hash: {receipt.transactionHash.hex()}")
-
-        return receipt.transactionHash.hex()
-    
-    def get_submissions(self, task_id):
-        """
-        Fetch submitted model hashes for a task from the smart contract.
-
-        Args:
-            task_id (str): The task ID
-
-        Returns:
-            List[str]: List of model IPFS hashes submitted
-        """
-        if not self.contract:
-            raise ConnectionError("Smart contract not initialized")
-
-        _, model_hashes, _ = self.contract.functions.getSubmissions(task_id).call()
-        return model_hashes
-    
-    def federated_average(self, weight_list):
+    def _federated_average(self, weight_list):
         """
         Perform federated averaging on a list of model weights.
         
@@ -356,36 +355,9 @@ class FederatedLearningSDK:
         Returns:
             list: Averaged model weights
         """
-        # Convert to numpy arrays if needed
-        weight_arrays = []
-        for weights in weight_list:
-            if isinstance(weights, str):
-                # If weights are provided as filenames, load them
-                model = tf.keras.Sequential([tf.keras.layers.Dense(1, input_shape=(1,))])
-                model.load_weights(weights)
-                weight_arrays.append([w.numpy() for w in model.weights])
-            else:
-                weight_arrays.append(weights)
-        
         # Calculate average weights
         avg_weights = []
-        for weights_per_layer in zip(*weight_arrays):
+        for weights_per_layer in zip(*weight_list):
             avg_weights.append(np.mean(weights_per_layer, axis=0))
         
         return avg_weights
-    
-    def apply_federated_weights(self, model, federated_weights):
-        """
-        Apply federated weights to a model.
-        
-        Args:
-            model (tf.keras.Model): The model
-            federated_weights (list): Federated weights
-            
-        Returns:
-            tf.keras.Model: The model with applied weights
-        """
-        for i, layer in enumerate(model.layers):
-            layer.set_weights([federated_weights[i]])
-        
-        return model
