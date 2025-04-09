@@ -115,6 +115,50 @@ class FederatedLearningSDK:
             # Return as data
             return self.ipfs_client.cat(content_hash)
     
+    # --- Common Operations ---
+    def build_model_from_schema(self, schema):
+        """
+        Build a TensorFlow model from a schema.
+        
+        Args:
+            schema (dict): The task schema
+            
+        Returns:
+            tf.keras.Model: The built model
+        """
+        model = tf.keras.Sequential()
+        
+        # Add layers according to the schema
+        for layer_config in schema.get("model_architecture", []):
+            layer_type = layer_config.get("type")
+            
+            if layer_type == "Dense":
+                units = layer_config.get("units", 10)
+                activation = layer_config.get("activation", "relu")
+                model.add(tf.keras.layers.Dense(units=units, activation=activation))
+            elif layer_type == "Conv2D":
+                filters = layer_config.get("filters", 32)
+                kernel_size = layer_config.get("kernel_size", (3, 3))
+                activation = layer_config.get("activation", "relu")
+                model.add(tf.keras.layers.Conv2D(filters=filters, kernel_size=kernel_size, activation=activation))
+            elif layer_type == "MaxPooling2D":
+                pool_size = layer_config.get("pool_size", (2, 2))
+                model.add(tf.keras.layers.MaxPooling2D(pool_size=pool_size))
+            elif layer_type == "Flatten":
+                model.add(tf.keras.layers.Flatten())
+            elif layer_type == "Dropout":
+                rate = layer_config.get("rate", 0.5)
+                model.add(tf.keras.layers.Dropout(rate=rate))
+        
+        # Compile the model
+        model.compile(
+            optimizer='adam',
+            loss='sparse_categorical_crossentropy',
+            metrics=['accuracy']
+        )
+        
+        return model
+    
     # --- Aggregator Operations ---
     
     def create_task(self, schema, task_id=None):
@@ -301,50 +345,6 @@ class FederatedLearningSDK:
         return receipt.transactionHash.hex()
     
     # --- Helper Methods ---
-    
-    def _build_model_from_schema(self, schema):
-        """
-        Build a TensorFlow model from a schema.
-        
-        Args:
-            schema (dict): The task schema
-            
-        Returns:
-            tf.keras.Model: The built model
-        """
-        model = tf.keras.Sequential()
-        
-        # Add layers according to the schema
-        for layer_config in schema.get("model_architecture", []):
-            layer_type = layer_config.get("type")
-            
-            if layer_type == "Dense":
-                units = layer_config.get("units", 10)
-                activation = layer_config.get("activation", "relu")
-                model.add(tf.keras.layers.Dense(units=units, activation=activation))
-            elif layer_type == "Conv2D":
-                filters = layer_config.get("filters", 32)
-                kernel_size = layer_config.get("kernel_size", (3, 3))
-                activation = layer_config.get("activation", "relu")
-                model.add(tf.keras.layers.Conv2D(filters=filters, kernel_size=kernel_size, activation=activation))
-            elif layer_type == "MaxPooling2D":
-                pool_size = layer_config.get("pool_size", (2, 2))
-                model.add(tf.keras.layers.MaxPooling2D(pool_size=pool_size))
-            elif layer_type == "Flatten":
-                model.add(tf.keras.layers.Flatten())
-            elif layer_type == "Dropout":
-                rate = layer_config.get("rate", 0.5)
-                model.add(tf.keras.layers.Dropout(rate=rate))
-        
-        # Compile the model
-        model.compile(
-            optimizer='adam',
-            loss='sparse_categorical_crossentropy',
-            metrics=['accuracy']
-        )
-        
-        return model
-    
     def _federated_average(self, weight_list):
         """
         Perform federated averaging on a list of model weights.
