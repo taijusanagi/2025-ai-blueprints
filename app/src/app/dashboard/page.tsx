@@ -65,6 +65,15 @@ const getTasks = async () => {
   }));
 };
 
+const generateStorageLink = (cid: string, type: "ipfs") => {
+  switch (type) {
+    case "ipfs":
+      return `https://dweb.link/ipfs/${cid}`;
+    default:
+      return cid;
+  }
+};
+
 // Interface for Session Details
 interface SessionUpdate {
   worker: string;
@@ -304,12 +313,13 @@ const SessionDetail = ({
               </CardHeader>
               <CardContent className="pt-1">
                 <a
-                  href={`https://dweb.link/ipfs/${sessionData.globalModelCID}`}
+                  href={generateStorageLink(sessionData.globalModelCID, "ipfs")}
                   target="_blank"
                   className="text-xs text-cyan-400 hover:text-cyan-300 underline flex items-center gap-1"
                   rel="noopener noreferrer"
                 >
-                  View on IPFS <ExternalLink className="w-3 h-3" />
+                  View Model File
+                  <ExternalLink className="w-3 h-3" />
                 </a>
               </CardContent>
             </Card>
@@ -481,7 +491,7 @@ const SessionDetail = ({
                     {update.cid}
                   </code>
                   <a
-                    href={`https://dweb.link/ipfs/${update.cid}`}
+                    href={generateStorageLink(update.cid, "ipfs")}
                     className="text-xs text-cyan-400 hover:text-cyan-300 underline flex items-center gap-1 mt-1"
                     target="_blank"
                     rel="noopener noreferrer"
