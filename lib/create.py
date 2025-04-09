@@ -6,8 +6,22 @@ import sys
 import os
 import argparse
 import json
+import numpy as np
 from sklearn.datasets import load_iris, load_wine, load_breast_cancer
 from trustml import FederatedLearningSDK
+
+# Custom JSON encoder to handle NumPy arrays
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.bool_):
+            return bool(obj)
+        return super(NumpyEncoder, self).default(obj)
 
 def get_dataset_info(dataset_name):
     """
@@ -21,27 +35,28 @@ def get_dataset_info(dataset_name):
     """
     if dataset_name.lower() == 'iris':
         data = load_iris()
+        # Convert NumPy arrays to Python lists for JSON serialization
         return {
             "name": "iris",
-            "features": data.feature_names,
-            "input_shape": [data.data.shape[1]],
-            "num_classes": len(data.target_names)
+            "features": [str(f) for f in data.feature_names],  # Convert to strings
+            "input_shape": [int(data.data.shape[1])],  # Convert to int
+            "num_classes": int(len(data.target_names))  # Convert to int
         }
     elif dataset_name.lower() == 'wine':
         data = load_wine()
         return {
             "name": "wine",
-            "features": data.feature_names,
-            "input_shape": [data.data.shape[1]],
-            "num_classes": len(data.target_names)
+            "features": [str(f) for f in data.feature_names],
+            "input_shape": [int(data.data.shape[1])],
+            "num_classes": int(len(data.target_names))
         }
     elif dataset_name.lower() == 'breast_cancer':
         data = load_breast_cancer()
         return {
             "name": "breast_cancer",
-            "features": data.feature_names,
-            "input_shape": [data.data.shape[1]],
-            "num_classes": len(data.target_names)
+            "features": [str(f) for f in data.feature_names],  # Convert to strings
+            "input_shape": [int(data.data.shape[1])],
+            "num_classes": int(len(data.target_names))
         }
     else:
         raise ValueError(f"Dataset '{dataset_name}' not supported. Choose from: iris, wine, breast_cancer")
@@ -76,8 +91,12 @@ def create_model_architecture(dataset_info, model_complexity="simple"):
         ]
     # Complex architecture
     elif model_complexity == "complex":
+        # For high-dimensional datasets like breast_cancer (30 features),
+        # we might want a wider first layer
+        first_layer_units = max(64, input_dim * 2)
+        
         return [
-            {"type": "Dense", "units": 64, "activation": "relu"},
+            {"type": "Dense", "units": first_layer_units, "activation": "relu"},
             {"type": "Dropout", "rate": 0.3},
             {"type": "Dense", "units": 32, "activation": "relu"},
             {"type": "Dropout", "rate": 0.2},
@@ -158,9 +177,9 @@ def main():
         print(f"\nCreating federated learning task for {args.dataset} classification...")
         task_info = sdk.create_task(schema, task_id=args.task_id)
         
-        # Save task information to file
+        # Save task information to file using custom JSON encoder
         with open(args.output, 'w') as f:
-            json.dump(task_info, f, indent=2)
+            json.dump(task_info, f, indent=2, cls=NumpyEncoder)
         
         print(f"\nTask created successfully!")
         print(f"Task ID: {task_info['task_id']}")
@@ -172,10 +191,13 @@ def main():
         print(f"Error: {e}")
         return 1
     except Exception as e:
-        print(f"Unexpected error: {e}")
+        print(f"Unexpected error: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return 1
     
     return 0
 
 if __name__ == "__main__":
     sys.exit(main())
+    
