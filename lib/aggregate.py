@@ -6,6 +6,7 @@ Aggregate models submitted to a federated learning task and submit final model
 import argparse
 import json
 import os
+from datetime import datetime
 import numpy as np
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
@@ -45,7 +46,9 @@ def main():
 
     print(f"🔄 Aggregating models for task ID: {args.task_id}...")
     try:
-        aggregated_model_path = sdk.aggregate_models(args.task_id, args.output)
+        os.makedirs("models", exist_ok=True)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        aggregated_model_path = sdk.aggregate_models(args.task_id, f"models/{args.task_id}_{timestamp}_aggregated.weights.h5")
         print(f"✅ Models aggregated and saved to: {aggregated_model_path}")
     except ValueError as e:
         print(f"❌ Error: {e}")

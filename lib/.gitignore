@@ -177,3 +177,4 @@ cython_debug/
 task_info.json
 *.weights.h5
 temp_models_*
+models

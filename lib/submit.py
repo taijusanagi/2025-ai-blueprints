@@ -6,6 +6,7 @@ Train a model on local Iris data and submit to a federated learning task
 import argparse
 import json
 import os
+from datetime import datetime
 import numpy as np
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
@@ -86,7 +87,9 @@ def main():
     print(f"Test accuracy: {test_acc:.4f}")
     
     # Save model weights
-    weights_file = f"model_weights_{args.task_id}.weights.h5"
+    os.makedirs("models", exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    weights_file = f"models/{args.task_id}_{timestamp}_submitted.weights.h5"
     model.save_weights(weights_file)
     print(f"Model weights saved to {weights_file}")
     
