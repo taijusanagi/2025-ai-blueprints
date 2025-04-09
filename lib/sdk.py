@@ -11,7 +11,6 @@ import json
 import os
 import time
 import ipfshttpclient
-import requests
 from web3 import Web3
 import tensorflow as tf
 import numpy as np
@@ -144,6 +143,22 @@ class FederatedLearningSDK:
             "schema_hash": schema_hash,
             "tx_hash": tx_hash
         }
+    
+    def get_task_schema_hash(self, task_id):
+        """
+        Fetch the schema IPFS hash for the given task from the smart contract.
+
+        Args:
+            task_id (str): The task ID
+
+        Returns:
+            str: IPFS hash of the task schema
+        """
+        if not self.contract:
+            raise ConnectionError("Smart contract not initialized")
+
+        schema_hash, _, _ = self.contract.functions.getTask(task_id).call()
+        return schema_hash
     
     def get_task_schema(self, schema_hash):
         """
@@ -314,6 +329,22 @@ class FederatedLearningSDK:
         print(f"Model submitted with tx hash: {receipt.transactionHash.hex()}")
 
         return receipt.transactionHash.hex()
+    
+    def get_submissions(self, task_id):
+        """
+        Fetch submitted model hashes for a task from the smart contract.
+
+        Args:
+            task_id (str): The task ID
+
+        Returns:
+            List[str]: List of model IPFS hashes submitted
+        """
+        if not self.contract:
+            raise ConnectionError("Smart contract not initialized")
+
+        _, model_hashes, _ = self.contract.functions.getSubmissions(task_id).call()
+        return model_hashes
     
     def federated_average(self, weight_list):
         """
