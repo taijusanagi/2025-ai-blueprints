@@ -174,7 +174,6 @@ cython_debug/
 .pypirc
 
 # Temp files
-task_info*
 *.weights.h5
 temp_models_*
 models

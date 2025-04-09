@@ -119,15 +119,9 @@ def main():
     parser.add_argument("--contract_abi", default="./abi/FederatedTaskManager.json", 
                        help="Path to contract ABI JSON file (default: ./abi/FederatedTaskManager.json)")
     parser.add_argument("--task_id", default=None, help="Custom task ID (optional)")
-    parser.add_argument("--output", default=None, 
-                       help="Output file to save task information (default: task_info_{dataset}_{complexity}.json)")
     
     args = parser.parse_args()
-    
-    # Set default output filename if not provided
-    if not args.output:
-        args.output = f"task_info_{args.dataset}_{args.model_complexity}.json"
-    
+        
     # Load contract ABI
     try:
         with open(args.contract_abi, 'r') as f:
@@ -177,15 +171,10 @@ def main():
         print(f"\nCreating federated learning task for {args.dataset} classification...")
         task_info = sdk.create_task(schema, task_id=args.task_id)
         
-        # Save task information to file using custom JSON encoder
-        with open(args.output, 'w') as f:
-            json.dump(task_info, f, indent=2, cls=NumpyEncoder)
-        
         print(f"\nTask created successfully!")
         print(f"Task ID: {task_info['task_id']}")
         print(f"Schema IPFS Hash: {task_info['schema_hash']}")
         print(f"Transaction Hash: {task_info['tx_hash']}")
-        print(f"Task information saved to {args.output}")
         
     except ValueError as e:
         print(f"Error: {e}")
@@ -200,4 +189,3 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-    
