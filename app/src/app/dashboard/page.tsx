@@ -15,19 +15,15 @@ import {
   LayoutGrid,
   BarChartBig,
   ListTree,
-  Code,
   List,
   ChevronRight,
   ArrowLeft, // Added List, ChevronRight, ArrowLeft
   FileCode,
   User,
-  Hash,
-  Fingerprint,
   Gauge,
   Clock,
   ExternalLink,
   Activity,
-  ShieldCheck, // Added Activity, ShieldCheck
 } from "lucide-react";
 import {
   Bar,
@@ -55,7 +51,6 @@ interface SessionDetailData {
   id: string;
   name: string;
   description: string;
-  round: number;
   globalAccuracy: number;
   globalModelCID: string;
   updates: SessionUpdate[];
@@ -66,7 +61,6 @@ interface SessionDetailData {
 interface SessionListItem {
   id: string;
   name: string;
-  currentRound: number;
   participants: number;
   status: "Active" | "Completed" | "Paused";
 }
@@ -76,30 +70,20 @@ const flSessionsList: SessionListItem[] = [
   {
     id: "mnist-fl-001",
     name: "MNIST Digit Classification",
-    currentRound: 3,
     participants: 3,
     status: "Active",
   },
   {
     id: "cifar10-fl-002",
     name: "CIFAR-10 Image Recognition",
-    currentRound: 15,
     participants: 8,
     status: "Active",
   },
   {
     id: "imdb-sentiment-003",
     name: "IMDB Sentiment Analysis",
-    currentRound: 5,
     participants: 5,
     status: "Completed",
-  },
-  {
-    id: "medical-img-fl-004",
-    name: "Medical Image Segmentation",
-    currentRound: 1,
-    participants: 2,
-    status: "Paused",
   },
 ];
 
@@ -109,7 +93,6 @@ const detailedSessionData: { [key: string]: SessionDetailData } = {
     id: "mnist-fl-001",
     name: "MNIST Digit Classification",
     description: "Training a model to recognize handwritten digits (0-9).",
-    round: 3,
     globalAccuracy: 0.9412,
     globalModelCID:
       "bafybeigdyrg2zao34nvnpfztcj4kltr3u5aqwkyk5ajh5v2oo5cvceuqnu",
@@ -146,7 +129,6 @@ const detailedSessionData: { [key: string]: SessionDetailData } = {
     name: "CIFAR-10 Image Recognition",
     description:
       "Classifying small images into 10 categories (airplane, car, bird, etc.).",
-    round: 15,
     globalAccuracy: 0.885,
     globalModelCID: "bafybeicifar...",
     status: "Active",
@@ -190,7 +172,6 @@ const detailedSessionData: { [key: string]: SessionDetailData } = {
     id: "imdb-sentiment-003",
     name: "IMDB Sentiment Analysis",
     description: "Analyzing movie reviews for positive or negative sentiment.",
-    round: 5,
     globalAccuracy: 0.9123,
     globalModelCID: "bafybeiimdb...",
     status: "Completed",
@@ -210,25 +191,6 @@ const detailedSessionData: { [key: string]: SessionDetailData } = {
         accuracy: 0.918,
         timestamp: "2025-03-20T14:05:00Z",
         cid: "bafyimdb2...",
-      },
-    ],
-  },
-  "medical-img-fl-004": {
-    id: "medical-img-fl-004",
-    name: "Medical Image Segmentation",
-    description: "Identifying regions of interest in medical scans.",
-    round: 1,
-    globalAccuracy: 0.85, // Example accuracy for paused state
-    globalModelCID: "bafybeimedical...",
-    status: "Paused",
-    updates: [
-      {
-        worker: "0xmedA...",
-        model_hash: "0xmedhashA...",
-        signature: "0xsigmedA...",
-        accuracy: 0.85,
-        timestamp: "2025-04-01T11:00:00Z",
-        cid: "bafymedA...",
       },
     ],
   },
@@ -279,8 +241,6 @@ const SessionList = ({
         return "text-green-400 border-green-400/50 bg-green-500/10";
       case "Completed":
         return "text-blue-400 border-blue-400/50 bg-blue-500/10";
-      case "Paused":
-        return "text-yellow-400 border-yellow-400/50 bg-yellow-500/10";
       default:
         return "text-slate-400 border-slate-400/50 bg-slate-500/10";
     }
@@ -308,8 +268,7 @@ const SessionList = ({
               <div>
                 <h3 className="font-semibold text-white">{session.name}</h3>
                 <p className="text-sm text-slate-400 mt-1">
-                  Round: {session.currentRound} | Participants:{" "}
-                  {session.participants}
+                  Participants: {session.participants}
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -400,10 +359,10 @@ const SessionDetail = ({
         <Card className="bg-slate-800/90 border-slate-700/50">
           <CardHeader className="pb-2">
             <CardDescription className="text-slate-400">
-              Current Round
+              Participants
             </CardDescription>
             <CardTitle className="text-3xl text-cyan-300">
-              {sessionData.round}
+              {sessionData.updates ? sessionData.updates.length : 0}
             </CardTitle>
           </CardHeader>
         </Card>
@@ -463,7 +422,7 @@ const SessionDetail = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl text-white">
             <BarChartBig className="w-5 h-5 text-cyan-400" />
-            Node Accuracy Distribution (Round {sessionData.round})
+            Node Accuracy Distribution
           </CardTitle>
           <CardDescription className="text-slate-400">
             Accuracy of individual node updates compared to the global average.
@@ -549,7 +508,7 @@ const SessionDetail = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl text-white">
             <ListTree className="w-5 h-5 text-cyan-400" />
-            Node Updates (Round {sessionData.round})
+            Node Updates
           </CardTitle>
           <CardDescription className="text-slate-400">
             Details of individual model updates submitted by participating
@@ -592,21 +551,9 @@ const SessionDetail = ({
                   <code className="block text-slate-400 font-mono text-xs break-all">
                     {update.worker}
                   </code>
-                  <div className="text-slate-400 flex items-center gap-2 pt-1">
-                    <Hash className="w-4 h-4" /> Model Hash:
-                  </div>
-                  <code className="block text-slate-500 font-mono text-xs break-all">
-                    {shorten(update.model_hash, 10, 6)}
-                  </code>
-                  <div className="text-slate-400 flex items-center gap-2 pt-1">
-                    <Fingerprint className="w-4 h-4" /> Signature:
-                  </div>
-                  <code className="block text-slate-500 font-mono text-xs break-all">
-                    {shorten(update.signature, 10, 6)}
-                  </code>
                   <div className="flex items-center justify-between pt-1">
                     <span className="text-slate-400 flex items-center gap-2">
-                      <FileCode className="w-4 h-4" /> CID:
+                      <FileCode className="w-4 h-4" /> Node Model CID:
                     </span>
                     <Button
                       variant="ghost"
