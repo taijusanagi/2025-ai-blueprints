@@ -11,7 +11,7 @@ from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
-from federated_learning_sdk import FederatedLearningSDK
+from sdk import FederatedLearningSDK
 
 def main():
     parser = argparse.ArgumentParser(description="Aggregate models submitted to a federated learning task")

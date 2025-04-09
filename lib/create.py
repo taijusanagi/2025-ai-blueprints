@@ -2,10 +2,13 @@
 """
 Create a federated learning task for iris classification
 """
-
+import sys
+import os
 import argparse
 import json
-from federated_learning_sdk import FederatedLearningSDK
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from sdk import FederatedLearningSDK
 
 # Task schema for iris classification
 IRIS_SCHEMA = {
