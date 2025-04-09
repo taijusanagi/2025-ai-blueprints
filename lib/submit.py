@@ -86,7 +86,7 @@ def main():
     print(f"Test accuracy: {test_acc:.4f}")
     
     # Save model weights
-    weights_file = f"model_weights_{args.task_id}.h5"
+    weights_file = f"model_weights_{args.task_id}.weights.h5"
     model.save_weights(weights_file)
     print(f"Model weights saved to {weights_file}")
     
