@@ -283,6 +283,37 @@ class FederatedLearningSDK:
         os.rename(weights_hash, output_file)
         
         return output_file
+
+    def submit_model_to_filecoin(self, task_id, model_weights_file):
+        """
+        Submit trained model weights to the Filecoin smart contract.
+
+        Args:
+            task_id (str): ID of the task to submit to
+            model_weights_file (str): Path to the saved weights file (.h5)
+
+        Returns:
+            str: Transaction hash
+        """
+        if not self.web3 or not self.contract:
+            raise ConnectionError("Web3 or contract not initialized")
+
+        # Upload weights to IPFS
+        model_hash = self.upload_model_weights_to_ipfs(model_weights_file)
+
+        # Get default account
+        account = self.web3.eth.accounts[0]
+
+        # Submit the model hash to the smart contract
+        tx_hash = self.contract.functions.submitModel(
+            task_id,
+            model_hash
+        ).transact({'from': account})
+
+        receipt = self.web3.eth.wait_for_transaction_receipt(tx_hash)
+        print(f"Model submitted with tx hash: {receipt.transactionHash.hex()}")
+
+        return receipt.transactionHash.hex()
     
     def federated_average(self, weight_list):
         """
