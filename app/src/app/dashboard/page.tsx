@@ -49,27 +49,20 @@ const contract = new ethers.Contract(
 
 const getTasks = async () => {
   const tasks = await contract.getTasks();
-  console.log("Tasks from contract:", tasks);
   return tasks.map((task: any) => ({
-    id: task.taskId,
+    id: String(task.taskId), // make sure it's string
     schemaHash: task.schemaHash,
     creator: task.creator,
-    timestamp: task.timestamp,
+    timestamp: Number(task.timestamp), // convert BigInt to number
     finalModelCID: task.finalModelHash,
-    finalAccuracy: task.finalAccuracy,
+    finalAccuracy: Number(task.finalAccuracy) / 10000, // convert + scale
     submissions: task.submissions.map((sub: any) => ({
       modelHash: sub.modelHash,
       submitter: sub.submitter,
-      timestamp: sub.timestamp,
-      accuracy: sub.accuracy,
+      timestamp: Number(sub.timestamp) * 1000, // convert to ms
+      accuracy: Number(sub.accuracy) / 10000, // convert + scale
     })),
   }));
-};
-
-const fetchIPFSData = async (cid: string) => {
-  const response = await fetch(`http://localhost:5001/ipfs/${cid}`);
-  const data = await response.json(); // or text/blob based on your model format
-  return data;
 };
 
 // Interface for Session Details
@@ -97,140 +90,8 @@ interface SessionListItem {
   id: string;
   name: string;
   participants: number;
-  status: "Active" | "Completed" | "Paused";
+  status: "Active" | "Completed";
 }
-
-// Mock Data for the List
-const flSessionsList: SessionListItem[] = [
-  {
-    id: "mnist-fl-001",
-    name: "MNIST Digit Classification",
-    participants: 3,
-    status: "Active",
-  },
-  {
-    id: "cifar10-fl-002",
-    name: "CIFAR-10 Image Recognition",
-    participants: 8,
-    status: "Active",
-  },
-  {
-    id: "imdb-sentiment-003",
-    name: "IMDB Sentiment Analysis",
-    participants: 5,
-    status: "Completed",
-  },
-];
-
-// Mock Detailed Data for Each Session (using the first session ID as key for example)
-const detailedSessionData: { [key: string]: SessionDetailData } = {
-  "mnist-fl-001": {
-    id: "mnist-fl-001",
-    name: "MNIST Digit Classification",
-    description: "Training a model to recognize handwritten digits (0-9).",
-    globalAccuracy: 0.9412,
-    globalModelCID:
-      "bafybeigdyrg2zao34nvnpfztcj4kltr3u5aqwkyk5ajh5v2oo5cvceuqnu",
-    status: "Active",
-    updates: [
-      {
-        worker: "0xabc123...",
-        model_hash: "0x1a2b...",
-        signature: "0xsig1...",
-        accuracy: 0.932,
-        timestamp: "2025-04-07T10:12:30Z",
-        cid: "bafybei...file1",
-      },
-      {
-        worker: "0xdef456...",
-        model_hash: "0x2b3c...",
-        signature: "0xsig2...",
-        accuracy: 0.945,
-        timestamp: "2025-04-07T10:18:42Z",
-        cid: "bafybei...file2",
-      },
-      {
-        worker: "0x789ghi...",
-        model_hash: "0x3c4d...",
-        signature: "0xsig3...",
-        accuracy: 0.948,
-        timestamp: "2025-04-07T10:25:01Z",
-        cid: "bafybei...file3",
-      },
-    ],
-  },
-  "cifar10-fl-002": {
-    id: "cifar10-fl-002",
-    name: "CIFAR-10 Image Recognition",
-    description:
-      "Classifying small images into 10 categories (airplane, car, bird, etc.).",
-    globalAccuracy: 0.885,
-    globalModelCID: "bafybeicifar...",
-    status: "Active",
-    updates: [
-      // Example different updates
-      {
-        worker: "0xnodeA...",
-        model_hash: "0xcifarA...",
-        signature: "0xsigA...",
-        accuracy: 0.875,
-        timestamp: "2025-04-08T09:00:00Z",
-        cid: "bafycifara...",
-      },
-      {
-        worker: "0xnodeB...",
-        model_hash: "0xcifarB...",
-        signature: "0xsigB...",
-        accuracy: 0.891,
-        timestamp: "2025-04-08T09:05:00Z",
-        cid: "bafycifarb...",
-      },
-      {
-        worker: "0xnodeC...",
-        model_hash: "0xcifarC...",
-        signature: "0xsigC...",
-        accuracy: 0.888,
-        timestamp: "2025-04-08T09:10:00Z",
-        cid: "bafycifarc...",
-      },
-      {
-        worker: "0xnodeD...",
-        model_hash: "0xcifarD...",
-        signature: "0xsigD...",
-        accuracy: 0.886,
-        timestamp: "2025-04-08T09:10:00Z",
-        cid: "bafycifard...",
-      },
-    ],
-  },
-  "imdb-sentiment-003": {
-    id: "imdb-sentiment-003",
-    name: "IMDB Sentiment Analysis",
-    description: "Analyzing movie reviews for positive or negative sentiment.",
-    globalAccuracy: 0.9123,
-    globalModelCID: "bafybeiimdb...",
-    status: "Completed",
-    updates: [
-      {
-        worker: "0xrev1...",
-        model_hash: "0ximdb1...",
-        signature: "0xsigimdb1...",
-        accuracy: 0.905,
-        timestamp: "2025-03-20T14:00:00Z",
-        cid: "bafyimdb1...",
-      },
-      {
-        worker: "0xrev2...",
-        model_hash: "0ximdb2...",
-        signature: "0xsigimdb2...",
-        accuracy: 0.918,
-        timestamp: "2025-03-20T14:05:00Z",
-        cid: "bafyimdb2...",
-      },
-    ],
-  },
-  // Add more detailed data corresponding to list items
-};
 
 // --- Helper Functions ---
 
@@ -407,7 +268,7 @@ const SessionDetail = ({
               Global Accuracy
             </CardDescription>
             <CardTitle className="text-3xl text-pink-400">
-              {(sessionData.globalAccuracy * 100).toFixed(2)}%
+              {sessionData.globalAccuracy}%
             </CardTitle>
           </CardHeader>
         </Card>
@@ -518,9 +379,7 @@ const SessionDetail = ({
                     stroke="#f472b6"
                     strokeDasharray="4 4"
                     label={{
-                      value: `Global Avg (${(
-                        sessionData.globalAccuracy * 100
-                      ).toFixed(1)}%)`,
+                      value: `Global Avg (${sessionData.globalAccuracy}%)`,
                       position: "insideTopRight",
                       fill: "#f472b6",
                       fontSize: 12,
@@ -626,7 +485,7 @@ const SessionDetail = ({
                       <Gauge className="w-4 h-4" /> Accuracy:
                     </span>
                     <span className="font-medium text-white">
-                      {(update.accuracy * 100).toFixed(2)}%
+                      {update.accuracy}%
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -661,6 +520,9 @@ export default function DashboardPage() {
     {}
   );
   const [sessionList, setSessionList] = useState<SessionListItem[]>([]);
+  const [detailedSessions, setDetailedSessions] = useState<SessionDetailData[]>(
+    []
+  );
 
   useEffect(() => {
     const fetchTasksFromContract = async () => {
@@ -668,7 +530,6 @@ export default function DashboardPage() {
         const taskList = await getTasks();
         console.log("Fetched tasks:", taskList);
 
-        // Optional: You can map this to your current SessionListItem structure
         const sessions: SessionListItem[] = taskList.map((task: any) => ({
           id: task.id,
           name: `Task ${task.id}`,
@@ -676,7 +537,25 @@ export default function DashboardPage() {
           status: task.finalModelCID ? "Completed" : "Active",
         }));
 
+        const detailed: SessionDetailData[] = taskList.map((task: any) => ({
+          id: task.id,
+          name: `Task ${task.id}`,
+          description: `Schema: ${task.schemaHash}`, // Optional, add IPFS fetch if needed
+          globalAccuracy: task.finalAccuracy,
+          globalModelCID: task.finalModelCID,
+          status: task.finalModelCID ? "Completed" : "Active",
+          updates: task.submissions.map((sub: any) => ({
+            worker: sub.submitter,
+            model_hash: sub.modelHash,
+            signature: "", // You don't have this on-chain; leave blank or fetch from IPFS if available
+            accuracy: sub.accuracy,
+            timestamp: sub.timestamp,
+            cid: sub.modelHash, // Assuming modelHash is a CID; update if needed
+          })),
+        }));
+
         setSessionList(sessions);
+        setDetailedSessions(detailed);
       } catch (err) {
         console.error("Error fetching tasks:", err);
       }
@@ -696,9 +575,9 @@ export default function DashboardPage() {
   };
 
   // Get the detailed data for the selected session
-  const currentSessionData = selectedSessionId
-    ? detailedSessionData[selectedSessionId]
-    : undefined;
+  const currentSessionData = detailedSessions.find(
+    (s) => s.id === selectedSessionId
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-black text-slate-200 flex flex-col">
