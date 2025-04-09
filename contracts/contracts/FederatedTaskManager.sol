@@ -14,6 +14,7 @@ contract FederatedTaskManager {
         address creator;
         uint256 timestamp;
         Submission[] submissions;
+        string finalModelHash;
     }
 
     mapping(string => Task) private tasks;
@@ -21,6 +22,7 @@ contract FederatedTaskManager {
 
     event TaskCreated(string indexed taskId, string indexed schemaHash, address indexed creator);
     event ModelSubmitted(string indexed taskId, string indexed modelHash, address indexed submitter);
+    event FinalModelSubmitted(string indexed taskId, string indexed finalModelHash, address indexed creator);
 
     function createTask(string memory taskId, string memory schemaHash) external payable {
         require(tasks[taskId].creator == address(0), "Task already exists");
@@ -47,6 +49,17 @@ contract FederatedTaskManager {
         }));
 
         emit ModelSubmitted(taskId, modelHash, msg.sender);
+    }
+
+    function submitFinalModel(string memory taskId, string memory finalModelHash) external {
+        Task storage task = tasks[taskId];
+        require(task.creator != address(0), "Task not found");
+        require(msg.sender == task.creator, "Only task creator can submit final model");
+        require(bytes(task.finalModelHash).length == 0, "Final model already submitted");
+
+        task.finalModelHash = finalModelHash;
+
+        emit FinalModelSubmitted(taskId, finalModelHash, msg.sender);
     }
 
     function getTasks() external view returns (Task[] memory) {

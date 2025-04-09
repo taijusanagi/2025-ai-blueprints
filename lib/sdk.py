@@ -346,6 +346,37 @@ class FederatedLearningSDK:
         
         return receipt.transactionHash.hex()
     
+    def submit_final_model(self, task_id, final_model_weights_file):
+        """
+        Submit the final aggregated model to the smart contract.
+
+        Args:
+            task_id (str): The task ID for which to submit the final model.
+            final_model_weights_file (str): Path to the final aggregated model weights (.h5)
+
+        Returns:
+            str: Transaction hash of the submission
+        """
+        if not self.web3 or not self.contract:
+            raise ConnectionError("Web3 or contract not initialized")
+
+        # Upload final weights to IPFS
+        final_model_hash = self.upload_to_ipfs(final_model_weights_file, is_file=True)
+
+        # Get the current account
+        account = self.web3.eth.accounts[0]
+
+        # Submit the final model on-chain
+        tx_hash = self.contract.functions.submitFinalModel(
+            task_id,
+            final_model_hash
+        ).transact({'from': account})
+
+        # Wait for the transaction to be mined
+        receipt = self.web3.eth.wait_for_transaction_receipt(tx_hash)
+
+        return receipt.transactionHash.hex()
+    
     # --- Helper Methods ---
     def _federated_average(self, weight_list):
         """

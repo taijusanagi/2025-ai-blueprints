@@ -26,8 +26,8 @@ def main():
     parser = argparse.ArgumentParser(description="Create a federated learning task for Iris classification")
     parser.add_argument("--ipfs_api", default="/ip4/127.0.0.1/tcp/5001", help="IPFS API endpoint")
     parser.add_argument("--filecoin_rpc", default="http://localhost:8545", help="Filecoin RPC endpoint")
-    parser.add_argument("--contract_address", required=True, help="Address of the deployed contract")
-    parser.add_argument("--contract_abi", required=True, help="Path to contract ABI JSON file")
+    parser.add_argument("--contract_address", default="0x5FbDB2315678afecb367f032d93F642f64180aa3", help="Address of the deployed contract (default: local dev address)")
+    parser.add_argument("--contract_abi", default="./abi/FederatedTaskManager.json", help="Path to contract ABI JSON file (default: ./abi/FederatedTaskManager.json)")
     parser.add_argument("--task_id", default=None, help="Custom task ID (optional)")
     parser.add_argument("--output", default="task_info.json", help="Output file to save task information")
     
