@@ -11,7 +11,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  ClipboardCopy,
   LayoutGrid,
   BarChartBig,
   ListTree,
@@ -87,7 +86,7 @@ interface SessionUpdate {
 interface SessionDetailData {
   id: string;
   name: string;
-  description: string;
+  schemaHash: string;
   globalAccuracy: number;
   globalModelCID: string;
   updates: SessionUpdate[];
@@ -103,25 +102,6 @@ interface SessionListItem {
 }
 
 // --- Helper Functions ---
-
-// Helper function for copying text
-const copyToClipboard = (
-  text: string,
-  setCopiedStates: Function,
-  key: string | number
-) => {
-  navigator.clipboard
-    .writeText(text)
-    .then(() => {
-      setCopiedStates((prev: any) => ({ ...prev, [key]: true }));
-      setTimeout(() => {
-        setCopiedStates((prev: any) => ({ ...prev, [key]: false }));
-      }, 1500);
-    })
-    .catch((err) => {
-      console.error("Failed to copy text: ", err);
-    });
-};
 
 // Function to shorten strings
 const shorten = (str: string, start = 6, end = 4) => {
@@ -257,7 +237,20 @@ const SessionDetail = ({
         <LayoutGrid className="w-7 h-7 text-cyan-400" />
         {sessionData.name}
       </h1>
-      <p className="text-slate-400 -mt-6 ml-10">{sessionData.description}</p>
+      <div className="ml-10 mt-1 text-sm text-slate-400">
+        Schema:{" "}
+        <code className="text-slate-300 font-mono">
+          {shorten(sessionData.schemaHash, 10, 6)}
+        </code>
+        <a
+          href={generateStorageLink(sessionData.schemaHash, "ipfs")}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-4 text-cyan-400 hover:text-cyan-300 underline inline-flex items-center gap-1"
+        >
+          View Schema File <ExternalLink className="w-3 h-3" />
+        </a>
+      </div>
 
       {/* Global Stats Section */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -290,25 +283,6 @@ const SessionDetail = ({
                 </CardDescription>
                 <CardTitle className="text-lg text-slate-300 font-mono flex items-center gap-2">
                   {shorten(sessionData.globalModelCID, 10, 6)}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 text-slate-400 hover:text-white hover:bg-slate-700"
-                    onClick={() =>
-                      copyToClipboard(
-                        sessionData.globalModelCID,
-                        setCopiedStates,
-                        "globalCID"
-                      )
-                    }
-                    aria-label="Copy Global CID"
-                  >
-                    {copiedStates["globalCID"] ? (
-                      <ClipboardCopy className="w-4 h-4 text-green-400" />
-                    ) : (
-                      <ClipboardCopy className="w-4 h-4" />
-                    )}
-                  </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-1">
@@ -440,25 +414,6 @@ const SessionDetail = ({
                     <span className="font-semibold text-cyan-300 flex items-center gap-2">
                       <User className="w-4 h-4" /> Node Worker
                     </span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 text-slate-400 hover:text-white hover:bg-slate-700"
-                      onClick={() =>
-                        copyToClipboard(
-                          update.worker,
-                          setCopiedStates,
-                          `worker-${index}`
-                        )
-                      }
-                      aria-label="Copy Worker ID"
-                    >
-                      {copiedStates[`worker-${index}`] ? (
-                        <ClipboardCopy className="w-4 h-4 text-green-400" />
-                      ) : (
-                        <ClipboardCopy className="w-4 h-4" />
-                      )}
-                    </Button>
                   </div>
                   <code className="block text-slate-400 font-mono text-xs break-all">
                     {update.worker}
@@ -467,25 +422,6 @@ const SessionDetail = ({
                     <span className="text-slate-400 flex items-center gap-2">
                       <FileCode className="w-4 h-4" /> Node Model CID:
                     </span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 text-slate-400 hover:text-white hover:bg-slate-700"
-                      onClick={() =>
-                        copyToClipboard(
-                          update.cid,
-                          setCopiedStates,
-                          `cid-${index}`
-                        )
-                      }
-                      aria-label="Copy Update CID"
-                    >
-                      {copiedStates[`cid-${index}`] ? (
-                        <ClipboardCopy className="w-4 h-4 text-green-400" />
-                      ) : (
-                        <ClipboardCopy className="w-4 h-4" />
-                      )}
-                    </Button>
                   </div>
                   <code className="block text-slate-500 font-mono text-xs break-all">
                     {update.cid}
@@ -558,7 +494,7 @@ export default function DashboardPage() {
         const detailed: SessionDetailData[] = taskList.map((task: any) => ({
           id: task.id,
           name: `Task ${task.id}`,
-          description: `Schema: ${task.schemaHash}`, // Optional, add IPFS fetch if needed
+          schemaHash: task.schemaHash,
           globalAccuracy: task.finalAccuracy,
           globalModelCID: task.finalModelCID,
           status: task.finalModelCID ? "Completed" : "Active",
