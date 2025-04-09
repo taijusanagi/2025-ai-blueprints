@@ -37,4 +37,4 @@ python create.py --task_id "$TASK_ID" --dataset "$DATASET" --model_complexity "$
 python submit.py --task_id "$TASK_ID" --dataset "$DATASET"
 python submit.py --task_id "$TASK_ID" --dataset "$DATASET"
 python submit.py --task_id "$TASK_ID" --dataset "$DATASET"
-python aggregate.py --task_id "$TASK_ID" --dataset "$DATASET"
+# python aggregate.py --task_id "$TASK_ID" --dataset "$DATASET"

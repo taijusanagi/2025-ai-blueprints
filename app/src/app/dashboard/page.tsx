@@ -262,55 +262,59 @@ const SessionDetail = ({
             </CardTitle>
           </CardHeader>
         </Card>
-        <Card className="bg-slate-800/90 border-slate-700/50">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-slate-400">
-              Global Accuracy
-            </CardDescription>
-            <CardTitle className="text-3xl text-pink-400">
-              {sessionData.globalAccuracy}%
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card className="bg-slate-800/90 border-slate-700/50">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-slate-400">
-              Global Model CID
-            </CardDescription>
-            <CardTitle className="text-lg text-slate-300 font-mono flex items-center gap-2">
-              {shorten(sessionData.globalModelCID, 10, 6)}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 text-slate-400 hover:text-white hover:bg-slate-700"
-                onClick={() =>
-                  copyToClipboard(
-                    sessionData.globalModelCID,
-                    setCopiedStates,
-                    "globalCID"
-                  )
-                }
-                aria-label="Copy Global CID"
-              >
-                {copiedStates["globalCID"] ? (
-                  <ClipboardCopy className="w-4 h-4 text-green-400" />
-                ) : (
-                  <ClipboardCopy className="w-4 h-4" />
-                )}
-              </Button>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-1">
-            <a
-              href={`https://dweb.link/ipfs/${sessionData.globalModelCID}`}
-              target="_blank"
-              className="text-xs text-cyan-400 hover:text-cyan-300 underline flex items-center gap-1"
-              rel="noopener noreferrer"
-            >
-              View on IPFS <ExternalLink className="w-3 h-3" />
-            </a>
-          </CardContent>
-        </Card>
+        {sessionData.globalAccuracy > 0 && (
+          <>
+            <Card className="bg-slate-800/90 border-slate-700/50">
+              <CardHeader className="pb-2">
+                <CardDescription className="text-slate-400">
+                  Global Accuracy
+                </CardDescription>
+                <CardTitle className="text-3xl text-pink-400">
+                  {sessionData.globalAccuracy * 100} %
+                </CardTitle>
+              </CardHeader>
+            </Card>
+            <Card className="bg-slate-800/90 border-slate-700/50">
+              <CardHeader className="pb-2">
+                <CardDescription className="text-slate-400">
+                  Global Model CID
+                </CardDescription>
+                <CardTitle className="text-lg text-slate-300 font-mono flex items-center gap-2">
+                  {shorten(sessionData.globalModelCID, 10, 6)}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-slate-400 hover:text-white hover:bg-slate-700"
+                    onClick={() =>
+                      copyToClipboard(
+                        sessionData.globalModelCID,
+                        setCopiedStates,
+                        "globalCID"
+                      )
+                    }
+                    aria-label="Copy Global CID"
+                  >
+                    {copiedStates["globalCID"] ? (
+                      <ClipboardCopy className="w-4 h-4 text-green-400" />
+                    ) : (
+                      <ClipboardCopy className="w-4 h-4" />
+                    )}
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-1">
+                <a
+                  href={`https://dweb.link/ipfs/${sessionData.globalModelCID}`}
+                  target="_blank"
+                  className="text-xs text-cyan-400 hover:text-cyan-300 underline flex items-center gap-1"
+                  rel="noopener noreferrer"
+                >
+                  View on IPFS <ExternalLink className="w-3 h-3" />
+                </a>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </section>
 
       {/* Accuracy Chart Section */}
@@ -342,10 +346,10 @@ const SessionDetail = ({
                     tickFormatter={(value) => shorten(value)}
                   />
                   <YAxis
-                    domain={["dataMin - 0.01", "dataMax + 0.01"]}
+                    domain={[0, 1]}
+                    tickFormatter={(v) => `${(v * 100).toFixed(0)}%`}
                     stroke="#94a3b8"
                     fontSize={12}
-                    tickFormatter={(v) => `${(v * 100).toFixed(0)}%`}
                     tickCount={6}
                     width={40}
                     allowDataOverflow={true}
@@ -374,18 +378,22 @@ const SessionDetail = ({
                     radius={[4, 4, 0, 0]}
                     barSize={40}
                   />
-                  <ReferenceLine
-                    y={sessionData.globalAccuracy}
-                    stroke="#f472b6"
-                    strokeDasharray="4 4"
-                    label={{
-                      value: `Global Avg (${sessionData.globalAccuracy}%)`,
-                      position: "insideTopRight",
-                      fill: "#f472b6",
-                      fontSize: 12,
-                      dy: -5,
-                    }}
-                  />
+                  {sessionData.globalAccuracy > 0 && (
+                    <ReferenceLine
+                      y={sessionData.globalAccuracy}
+                      stroke="#f472b6"
+                      strokeDasharray="4 4"
+                      label={{
+                        value: `Global Avg (${(
+                          sessionData.globalAccuracy * 100
+                        ).toFixed(2)}%)`,
+                        position: "insideTopRight",
+                        fill: "#f472b6",
+                        fontSize: 12,
+                        dy: -5,
+                      }}
+                    />
+                  )}
                 </BarChart>
               </ResponsiveContainer>
             ) : (
