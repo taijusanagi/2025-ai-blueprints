@@ -63,23 +63,7 @@ def main():
         schema = sdk.get_task_schema(args.task_id)
         
         # Build model from schema
-        model = tf.keras.Sequential()
-        for layer_config in schema.get("model_architecture", []):
-            layer_type = layer_config.get("type")
-            
-            if layer_type == "Dense":
-                units = layer_config.get("units", 10)
-                activation = layer_config.get("activation", "relu")
-                model.add(tf.keras.layers.Dense(units=units, activation=activation))
-        
-        model.compile(
-            optimizer='adam',
-            loss='sparse_categorical_crossentropy',
-            metrics=['accuracy']
-        )
-        
-        # Load aggregated weights
-        model.build((None, schema["input_shape"][0]))
+        model = sdk.build_model_from_schema(schema)
         model.load_weights(aggregated_model_path)
         
         # Load Iris dataset for evaluation
