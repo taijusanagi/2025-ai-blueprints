@@ -23,6 +23,8 @@ def main():
     parser.add_argument("--test_split", type=float, default=0.2, help="Test split ratio (default: 0.2)")
     parser.add_argument("--epochs", type=int, default=50, help="Training epochs (default: 50)")
     parser.add_argument("--seed", type=int, default=42, help="Random seed (default: 42)")
+    parser.add_argument("--node_id", type=int, required=True, help="Unique node ID (e.g. 0, 1, 2...)")
+    parser.add_argument("--num_nodes", type=int, default=3, help="Total number of nodes")
     
     args = parser.parse_args()
     
@@ -53,9 +55,22 @@ def main():
     X = iris.data
     y = iris.target
     
+    # Shuffle and partition the data per node_id
+    total_samples = len(X)
+    indices = np.arange(total_samples)
+    np.random.seed(args.seed)
+    np.random.shuffle(indices)
+
+    # Split indices into roughly equal parts
+    node_indices = np.array_split(indices, args.num_nodes)
+    this_node_indices = node_indices[args.node_id]
+
+    X_local = X[this_node_indices]
+    y_local = y[this_node_indices]
+
     # Split data (simulate having only part of the dataset)
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=args.test_split, random_state=args.seed
+        X_local, y_local, test_size=args.test_split, random_state=args.seed
     )
     
     # Standardize features
