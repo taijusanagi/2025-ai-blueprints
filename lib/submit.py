@@ -65,7 +65,7 @@ def main():
     
     # Build model from schema using SDK's helper method
     print("Building model according to task schema...")
-    model = sdk._build_model_from_schema(schema)
+    model = sdk.build_model_from_schema(schema)
     
     # Print model summary
     model.build((None, schema["input_shape"][0]))
