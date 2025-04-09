@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Train a model on local Iris data and submit to a federated learning task
+Train a model on a selected sklearn dataset and submit to a federated learning task
 """
 
 import argparse
@@ -8,19 +8,45 @@ import json
 import os
 from datetime import datetime
 import numpy as np
-from sklearn.datasets import load_iris
+from sklearn.datasets import load_iris, load_wine, load_breast_cancer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
 from trustml import FederatedLearningSDK
 
+def get_dataset(dataset_name):
+    """
+    Load a dataset by name.
+    
+    Args:
+        dataset_name (str): Name of the dataset to load ('iris', 'wine', or 'breast_cancer')
+        
+    Returns:
+        tuple: (X, y, target_names) where X is the feature data, y is the target data,
+               and target_names are the class labels
+    """
+    if dataset_name.lower() == 'iris':
+        data = load_iris()
+    elif dataset_name.lower() == 'wine':
+        data = load_wine()
+    elif dataset_name.lower() == 'breast_cancer':
+        data = load_breast_cancer()
+    else:
+        raise ValueError(f"Dataset '{dataset_name}' not supported. Choose from: iris, wine, breast_cancer")
+        
+    return data.data, data.target, data.target_names
+
 def main():
-    parser = argparse.ArgumentParser(description="Train a model on Iris data and submit to a federated learning task")
+    parser = argparse.ArgumentParser(description="Train a model on selected dataset and submit to a federated learning task")
     parser.add_argument("--task_id", required=True, help="Task ID to submit the model to")
+    parser.add_argument("--dataset", default="iris", choices=["iris", "wine", "breast_cancer"], 
+                        help="Dataset to use (default: iris)")
     parser.add_argument("--ipfs_api", default="/ip4/127.0.0.1/tcp/5001", help="IPFS API endpoint")
     parser.add_argument("--filecoin_rpc", default="http://localhost:8545", help="Filecoin RPC endpoint")
-    parser.add_argument("--contract_address", default="0x5FbDB2315678afecb367f032d93F642f64180aa3", help="Address of the deployed contract (default: local dev address)")
-    parser.add_argument("--contract_abi", default="./abi/FederatedTaskManager.json", help="Path to contract ABI JSON file (default: ./abi/FederatedTaskManager.json)")
+    parser.add_argument("--contract_address", default="0x5FbDB2315678afecb367f032d93F642f64180aa3", 
+                        help="Address of the deployed contract (default: local dev address)")
+    parser.add_argument("--contract_abi", default="./abi/FederatedTaskManager.json", 
+                        help="Path to contract ABI JSON file (default: ./abi/FederatedTaskManager.json)")
     parser.add_argument("--test_split", type=float, default=0.2, help="Test split ratio (default: 0.2)")
     parser.add_argument("--epochs", type=int, default=50, help="Training epochs (default: 50)")
     parser.add_argument("--seed", type=int, default=42, help="Random seed (default: 42)")
@@ -48,11 +74,23 @@ def main():
     schema = sdk.get_task_schema(args.task_id)
     print(f"Task: {schema['task']}")
     
-    # Load Iris dataset
-    print("Loading Iris dataset...")
-    iris = load_iris()
-    X = iris.data
-    y = iris.target
+    # Load selected dataset
+    print(f"Loading {args.dataset} dataset...")
+    X, y, target_names = get_dataset(args.dataset)
+    print(f"Dataset shape: X={X.shape}, y={y.shape}, classes={len(target_names)}")
+    
+    # Verify that the model architecture is compatible with the dataset
+    input_dim = X.shape[1]
+    if input_dim != schema["input_shape"][0]:
+        print(f"Warning: Dataset has {input_dim} features but model expects {schema['input_shape'][0]}.")
+        print("Checking if we can adjust the model input layer...")
+        
+        # If using the first Dense layer, we might be able to adjust it
+        if schema["model_architecture"][0]["type"] == "Dense":
+            print(f"Adjusting input shape to match dataset: {input_dim}")
+            schema["input_shape"][0] = input_dim
+        else:
+            raise ValueError(f"Model architecture is not compatible with selected dataset. Expected {schema['input_shape'][0]} features, got {input_dim}.")
     
     # Split data (simulate having only part of the dataset)
     X_train, X_test, y_train, y_test = train_test_split(
@@ -89,7 +127,7 @@ def main():
     # Save model weights
     os.makedirs("models", exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    weights_file = f"models/{args.task_id}_{timestamp}_submitted.weights.h5"
+    weights_file = f"models/{args.task_id}_{args.dataset}_{timestamp}_submitted.weights.h5"
     model.save_weights(weights_file)
     print(f"Model weights saved to {weights_file}")
     
