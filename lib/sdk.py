@@ -265,14 +265,14 @@ class FederatedLearningSDK:
             
             # Load weights and collect
             model.load_weights(temp_file)
-            all_weights.append([layer.get_weights()[0] for layer in model.layers])
+            all_weights.append([layer.get_weights() for layer in model.layers])  # Get all weights including biases
         
         # Perform federated averaging
         averaged_weights = self._federated_average(all_weights)
         
         # Apply averaged weights to model
         for i, layer in enumerate(model.layers):
-            layer.set_weights([averaged_weights[i]])
+            layer.set_weights(averaged_weights[i])  # Set all weights including biases
         
         # Save aggregated model
         model.save_weights(output_file)
@@ -358,8 +358,30 @@ class FederatedLearningSDK:
             list: Averaged model weights
         """
         # Calculate average weights
+        num_models = len(weight_list)
+        num_layers = len(weight_list[0])
+        
+        # Initialize averaged weights structure
         avg_weights = []
-        for weights_per_layer in zip(*weight_list):
-            avg_weights.append(np.mean(weights_per_layer, axis=0))
+        
+        # For each layer
+        for layer_idx in range(num_layers):
+            # Get weights for this layer from all models
+            layer_weights = [model_weights[layer_idx] for model_weights in weight_list]
+            
+            # Each layer might have multiple weight tensors (weights and biases)
+            # Initialize list to hold averaged tensors for this layer
+            avg_layer_weights = []
+            
+            # For each weight tensor in the layer
+            for weight_idx in range(len(layer_weights[0])):
+                # Extract the same weight tensor from all models
+                weight_tensors = [model_layer_weights[weight_idx] for model_layer_weights in layer_weights]
+                
+                # Compute average
+                avg_tensor = np.mean(weight_tensors, axis=0)
+                avg_layer_weights.append(avg_tensor)
+            
+            avg_weights.append(avg_layer_weights)
         
         return avg_weights

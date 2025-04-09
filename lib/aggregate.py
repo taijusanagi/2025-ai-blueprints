@@ -32,7 +32,7 @@ def main():
     
     # Set output filename if not provided
     if not args.output:
-        args.output = f"aggregated_model_{args.task_id}.h5"
+        args.output = f"aggregated_model_{args.task_id}.weights.h5"
     
     # Load contract ABI
     with open(args.contract_abi, 'r') as f:
