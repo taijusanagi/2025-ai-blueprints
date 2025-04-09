@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,7 +35,42 @@ import {
   YAxis,
 } from "recharts";
 
-// --- Mock Data ---
+import { ethers } from "ethers";
+import FederatedTaskManagerABI from "@/abi/FederatedTaskManager.json"; // Save ABI separately
+
+const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+
+const provider = new ethers.JsonRpcProvider("http://localhost:8545"); // Use appropriate network
+const contract = new ethers.Contract(
+  CONTRACT_ADDRESS,
+  FederatedTaskManagerABI,
+  provider
+);
+
+const getTasks = async () => {
+  const tasks = await contract.getTasks();
+  console.log("Tasks from contract:", tasks);
+  return tasks.map((task: any) => ({
+    id: task.taskId,
+    schemaHash: task.schemaHash,
+    creator: task.creator,
+    timestamp: task.timestamp,
+    finalModelCID: task.finalModelHash,
+    finalAccuracy: task.finalAccuracy,
+    submissions: task.submissions.map((sub: any) => ({
+      modelHash: sub.modelHash,
+      submitter: sub.submitter,
+      timestamp: sub.timestamp,
+      accuracy: sub.accuracy,
+    })),
+  }));
+};
+
+const fetchIPFSData = async (cid: string) => {
+  const response = await fetch(`http://localhost:5001/ipfs/${cid}`);
+  const data = await response.json(); // or text/blob based on your model format
+  return data;
+};
 
 // Interface for Session Details
 interface SessionUpdate {
@@ -625,6 +660,30 @@ export default function DashboardPage() {
   const [copiedStates, setCopiedStates] = useState<{ [key: string]: boolean }>(
     {}
   );
+  const [sessionList, setSessionList] = useState<SessionListItem[]>([]);
+
+  useEffect(() => {
+    const fetchTasksFromContract = async () => {
+      try {
+        const taskList = await getTasks();
+        console.log("Fetched tasks:", taskList);
+
+        // Optional: You can map this to your current SessionListItem structure
+        const sessions: SessionListItem[] = taskList.map((task: any) => ({
+          id: task.id,
+          name: `Task ${task.id}`,
+          participants: task.submissions.length,
+          status: task.finalModelCID ? "Completed" : "Active",
+        }));
+
+        setSessionList(sessions);
+      } catch (err) {
+        console.error("Error fetching tasks:", err);
+      }
+    };
+
+    fetchTasksFromContract();
+  }, []);
 
   const handleSelectSession = (id: string) => {
     setCopiedStates({}); // Reset copied states when changing views
@@ -673,7 +732,7 @@ export default function DashboardPage() {
         {selectedSessionId === null ? (
           // Show the list if no session is selected
           <SessionList
-            sessions={flSessionsList}
+            sessions={sessionList}
             onSelectSession={handleSelectSession}
           />
         ) : (
