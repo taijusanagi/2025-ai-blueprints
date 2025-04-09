@@ -76,7 +76,7 @@ def main():
     # Submit final model
     print(f"🚀 Submitting final aggregated model to the blockchain...")
     try:
-        tx_hash = sdk.submit_final_model(args.task_id, aggregated_model_path)
+        tx_hash = sdk.submit_final_model(args.task_id, aggregated_model_path, acc)
         print(f"✅ Final model submitted successfully. Tx hash: {tx_hash}")
     except Exception as e:
         print(f"❌ Submission failed: {e}")

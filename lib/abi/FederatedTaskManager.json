@@ -19,6 +19,12 @@
         "internalType": "address",
         "name": "creator",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "accuracy",
+        "type": "uint256"
       }
     ],
     "name": "FinalModelSubmitted",
@@ -44,6 +50,12 @@
         "internalType": "address",
         "name": "submitter",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "accuracy",
+        "type": "uint256"
       }
     ],
     "name": "ModelSubmitted",
@@ -134,6 +146,11 @@
                 "internalType": "uint256",
                 "name": "timestamp",
                 "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "accuracy",
+                "type": "uint256"
               }
             ],
             "internalType": "struct FederatedTaskManager.Submission[]",
@@ -144,6 +161,11 @@
             "internalType": "string",
             "name": "finalModelHash",
             "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "finalAccuracy",
+            "type": "uint256"
           }
         ],
         "internalType": "struct FederatedTaskManager.Task[]",
@@ -165,6 +187,11 @@
         "internalType": "string",
         "name": "finalModelHash",
         "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "accuracy",
+        "type": "uint256"
       }
     ],
     "name": "submitFinalModel",
@@ -183,6 +210,11 @@
         "internalType": "string",
         "name": "modelHash",
         "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "accuracy",
+        "type": "uint256"
       }
     ],
     "name": "submitModel",

@@ -315,7 +315,7 @@ class FederatedLearningSDK:
         # Parse and return
         return json.loads(schema_json)
     
-    def submit_model(self, task_id, model_weights_file):
+    def submit_model(self, task_id, model_weights_file, accuracy: float):
         """
         Submit trained model weights for a task.
         
@@ -338,7 +338,8 @@ class FederatedLearningSDK:
         # Submit to blockchain
         tx_hash = self.contract.functions.submitModel(
             task_id,
-            model_hash
+            model_hash,
+            int(accuracy * 10000)
         ).transact({'from': account})
         
         # Wait for transaction to be mined
@@ -346,7 +347,7 @@ class FederatedLearningSDK:
         
         return receipt.transactionHash.hex()
     
-    def submit_final_model(self, task_id, final_model_weights_file):
+    def submit_final_model(self, task_id, final_model_weights_file, accuracy: float):
         """
         Submit the final aggregated model to the smart contract.
 
@@ -369,7 +370,8 @@ class FederatedLearningSDK:
         # Submit the final model on-chain
         tx_hash = self.contract.functions.submitFinalModel(
             task_id,
-            final_model_hash
+            final_model_hash,
+            int(accuracy * 10000)
         ).transact({'from': account})
 
         # Wait for the transaction to be mined

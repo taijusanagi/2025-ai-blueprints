@@ -92,7 +92,7 @@ def main():
     
     # Submit trained model to the task
     print("Submitting trained model to the blockchain...")
-    tx_hash = sdk.submit_model(args.task_id, weights_file)
+    tx_hash = sdk.submit_model(args.task_id, weights_file, test_acc)
     
     print(f"Model submitted successfully!")
     print(f"Transaction hash: {tx_hash}")
