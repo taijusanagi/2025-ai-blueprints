@@ -11,7 +11,7 @@ from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
-from sdk import FederatedLearningSDK
+from trustml import FederatedLearningSDK
 
 
 def main():
