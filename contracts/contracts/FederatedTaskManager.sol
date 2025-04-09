@@ -3,16 +3,26 @@ pragma solidity ^0.8.0;
 
 contract FederatedTaskManager {
     struct Task {
-        string schemaHash; // IPFS CID
+        string schemaHash;
         address creator;
         uint256 reward;
         bool exists;
     }
 
+    struct Submission {
+        address submitter;
+        string modelHash;
+        uint256 timestamp;
+    }
+
     mapping(string => Task) public tasks;
     string[] private taskIds;
 
+    // taskId => array of submissions
+    mapping(string => Submission[]) public submissions;
+
     event TaskCreated(string indexed taskId, string schemaHash, address indexed creator, uint256 reward);
+    event ModelSubmitted(string indexed taskId, address indexed submitter, string modelHash);
 
     function createTask(string memory taskId, string memory schemaHash, uint256 reward) public payable {
         require(!tasks[taskId].exists, "Task already exists");
@@ -26,7 +36,6 @@ contract FederatedTaskManager {
         });
 
         taskIds.push(taskId);
-
         emit TaskCreated(taskId, schemaHash, msg.sender, reward);
     }
 
@@ -59,5 +68,37 @@ contract FederatedTaskManager {
         }
 
         return (schemaHashes, creators, rewards);
+    }
+
+    function submitModel(string memory taskId, string memory modelHash) public {
+        require(tasks[taskId].exists, "Task does not exist");
+
+        submissions[taskId].push(Submission({
+            submitter: msg.sender,
+            modelHash: modelHash,
+            timestamp: block.timestamp
+        }));
+
+        emit ModelSubmitted(taskId, msg.sender, modelHash);
+    }
+
+    function getSubmissions(string memory taskId) public view returns (
+        address[] memory submitters,
+        string[] memory modelHashes,
+        uint256[] memory timestamps
+    ) {
+        uint256 length = submissions[taskId].length;
+        submitters = new address[](length);
+        modelHashes = new string[](length);
+        timestamps = new uint256[](length);
+
+        for (uint256 i = 0; i < length; i++) {
+            Submission memory s = submissions[taskId][i];
+            submitters[i] = s.submitter;
+            modelHashes[i] = s.modelHash;
+            timestamps[i] = s.timestamp;
+        }
+
+        return (submitters, modelHashes, timestamps);
     }
 }
