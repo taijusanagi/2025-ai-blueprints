@@ -173,6 +173,7 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-# Output
+# Temp files
 task_info.json
 *.weights.h5
+temp_models_*

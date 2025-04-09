@@ -127,6 +127,7 @@ class FederatedLearningSDK:
             tf.keras.Model: The built model
         """
         model = tf.keras.Sequential()
+        input_shape = schema.get("input_shape")
         
         # Add layers according to the schema
         for layer_config in schema.get("model_architecture", []):
@@ -150,6 +151,7 @@ class FederatedLearningSDK:
                 rate = layer_config.get("rate", 0.5)
                 model.add(tf.keras.layers.Dropout(rate=rate))
         
+        model.build(input_shape=(None, *input_shape))
         # Compile the model
         model.compile(
             optimizer='adam',
@@ -200,7 +202,7 @@ class FederatedLearningSDK:
             "tx_hash": receipt.transactionHash.hex()
         }
     
-    def aggregate_models(self, task_id, output_file="aggregated_model.h5"):
+    def aggregate_models(self, task_id, output_file="aggregated_model.weights.h5"):
         """
         Fetch all model submissions for a task and perform federated averaging.
         
@@ -247,7 +249,7 @@ class FederatedLearningSDK:
         schema = json.loads(schema_json)
         
         # Build model from schema
-        model = self._build_model_from_schema(schema)
+        model = self.build_model_from_schema(schema)
         
         # Download and collect all model weights
         all_weights = []
@@ -256,7 +258,7 @@ class FederatedLearningSDK:
         
         for i, submission in enumerate(task_data["submissions"]):
             model_hash = submission["model_hash"]
-            temp_file = os.path.join(temp_dir, f"model_{i}.h5")
+            temp_file = os.path.join(temp_dir, f"model_{i}.weights.h5")
             
             # Download model weights
             self.download_from_ipfs(model_hash, temp_file)
