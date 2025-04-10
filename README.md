@@ -4,6 +4,14 @@ Verifiable Federated Learning with Filecoin
 
 ![ogp](./app/public/ogp.png)
 
+## 🎯 Submission
+
+🎥 Demo video: [link to be added]
+
+🌐 Live App: https://2025-ai-blueprints.vercel.app/
+
+🧾 Filecoin Smart Contract: https://calibration.filfox.info/en/address/0x76C9284988B979f750BC504173ADc08E00c04398
+
 ## 🔥 Project Summary
 
 TrustML is a verifiable federated learning platform powered by Filecoin and Akave. It enables trustable, decentralized machine learning by allowing multiple nodes to train locally, submit verifiable updates, and collaborate securely to build a global model.
@@ -22,18 +30,19 @@ TrustML solves this by combining:
 - Smart contracts to store proof of contributions
 - Only verified updates are included in the aggregation, ensuring the global model is tamper-resistant and auditable.
 
-![ogp](./app/public/diagram.png)
+## 🔧 Technical Detail
 
-## 🎯 Use Case:
+### SDK
 
-- Federated + Verifiable Training
+https://github.com/taijusanagi/2025-ai-blueprints/blob/main/lib/trustml.py
 
-## 🎯 Submission
+- Supports uploading and downloading TensorFlow neural network schemas and weights via Akave
+- Enables creation and submission of federated learning tasks and TensorFlow models with interaction to the Filecoin smart contract
+- Performs federated averaging of TensorFlow model weights submitted by participants
 
-🎥 Demo video: [link to be added]
+### App
 
-🌐 Dashboard: [demo site link]
+https://github.com/taijusanagi/2025-ai-blueprints/blob/main/app/src/app/dashboard/page.tsx
 
-🧾 Smart Contract: 0x76C9284988B979f750BC504173ADc08E00c04398
-
-🖼 Architecture Diagram: [Included in submission]
+- Visual dashboard for monitoring federated learning sessions
+- Fetches task data from the Filecoin smart contract and visualizes schema, accuracy metrics, and model updates

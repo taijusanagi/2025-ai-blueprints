@@ -414,7 +414,7 @@ const SessionDetail = ({
                       <Gauge className="w-4 h-4" /> Accuracy:
                     </span>
                     <span className="font-medium text-white">
-                      {update.accuracy}%
+                      {update.accuracy * 100}%
                     </span>
                   </div>
                   <div className="flex justify-between items-center">

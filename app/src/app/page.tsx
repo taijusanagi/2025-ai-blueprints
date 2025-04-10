@@ -72,7 +72,7 @@ export default function TrustMLLandingPage() {
         </h1>
         <p className="mt-6 text-lg md:text-xl text-slate-400 max-w-2xl mx-auto">
           TrustML enables verifiable, multi-node machine learning model
-          training, secured by Filecoin, Merkle proofs, and smart contracts.
+          training, secured by Filecoin and Akave.
         </p>
         <div className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
           <Button
@@ -109,7 +109,7 @@ export default function TrustMLLandingPage() {
             icon: ShieldCheck,
             title: "Verifiable Training",
             description:
-              "Each model update is signed, cryptographically hashed, and anchored on-chain & Filecoin.",
+              "Each model update is signed, cryptographically hashed, and anchored on-chain.",
           },
           {
             icon: GitBranch,
@@ -119,7 +119,7 @@ export default function TrustMLLandingPage() {
           },
           {
             icon: DatabaseZap,
-            title: "Powered by Filecoin",
+            title: "Powered by Filecoin & Akave",
             description:
               "Leverages decentralized storage for robust model weight and metadata persistence and auditability.",
           },
@@ -175,7 +175,7 @@ export default function TrustMLLandingPage() {
       {/* --- How It Works Section (Diagram & Code) --- */}
       <section className="mt-24 md:mt-32 max-w-6xl w-full z-10 px-4 mx-auto">
         <h3 className="text-3xl font-bold mb-10 text-white text-center">
-          How TrustML Works with TensorFlow
+          How TrustML Works
         </h3>
 
         <div className="flex flex-col lg:flex-row gap-10 lg:gap-12 items-center justify-center">
