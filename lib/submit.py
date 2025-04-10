@@ -45,8 +45,8 @@ def main():
     parser.add_argument("--ipfs_api", default="/ip4/127.0.0.1/tcp/5001", help="IPFS API endpoint")
     parser.add_argument("--akave_api_url", default="http://localhost:8000", help="Akave API URL")
     parser.add_argument("--bucket_id", default="myBucket", help="Bucket ID for Akave")
-    parser.add_argument("--filecoin_rpc", default="http://localhost:8545", help="Filecoin RPC endpoint")
-    parser.add_argument("--contract_address", default="0x5FbDB2315678afecb367f032d93F642f64180aa3", 
+    parser.add_argument("--filecoin_rpc", default="https://rpc.ankr.com/filecoin_testnet", help="Filecoin RPC endpoint")
+    parser.add_argument("--contract_address", default="0x76C9284988B979f750BC504173ADc08E00c04398", 
                         help="Address of the deployed contract (default: local dev address)")
     parser.add_argument("--contract_abi", default="./abi/FederatedTaskManager.json", 
                         help="Path to contract ABI JSON file (default: ./abi/FederatedTaskManager.json)")

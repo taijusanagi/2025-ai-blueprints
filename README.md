@@ -93,3 +93,7 @@ This project is built for the "Hack the Data Layer for AI" track:
 
 This project is made possible by Encode Club & Filecoin ecosystem.
 Let's make federated learning trustable, decentralized, and open.
+
+## Deployed Address
+
+0x76C9284988B979f750BC504173ADc08E00c04398

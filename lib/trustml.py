@@ -1,12 +1,3 @@
-"""
-SDK for Federated Learning with IPFS and Filecoin integration.
-
-This module provides functionality to:
-1. Upload schema to IPFS
-2. Create tasks and submit models to Filecoin smart contracts
-3. Integrate with TensorFlow models for federated averaging
-"""
-
 import json
 import io
 import os
@@ -17,6 +8,7 @@ import tensorflow as tf
 import numpy as np
 import requests
 import mimetypes
+from eth_account import Account
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -34,12 +26,16 @@ class FederatedLearningSDK:
     """Streamlined SDK for Federated Learning with IPFS and Filecoin integration."""
     
     def __init__(self, provider="ipfs", bucket_id="myBucket", akave_api_url="http://localhost:8000",
-                 ipfs_api="/ip4/127.0.0.1/tcp/5001", filecoin_rpc="http://localhost:8545", 
-                 contract_address=None, contract_abi=None):
+                 ipfs_api="/ip4/127.0.0.1/tcp/5001", filecoin_rpc="https://rpc.ankr.com/filecoin_testnet", 
+                 contract_address=None, contract_abi=None, private_key=None):
         self.provider = provider
         self.bucket_id = bucket_id
         self.akave_api_url = akave_api_url
         self.ipfs_api = ipfs_api
+        
+        # Get private key from parameter or environment variable
+        self.private_key = private_key or os.getenv("PRIVATE_KEY")
+        self.account_address = None
         
         # Initialize connections
         if provider == "ipfs":
@@ -54,6 +50,16 @@ class FederatedLearningSDK:
             self.web3 = Web3(Web3.HTTPProvider(filecoin_rpc))
             if self.web3.is_connected():
                 print("Connected to Filecoin network")
+                
+                # Set up account from private key if provided
+                if self.private_key:
+                    # Ensure the private key has 0x prefix
+                    if not self.private_key.startswith('0x'):
+                        self.private_key = '0x' + self.private_key
+                    account = Account.from_key(self.private_key)
+                    self.account_address = account.address
+                    print(f"Using account: {self.account_address}")
+                
                 if contract_address and contract_abi:
                     self.contract = self.web3.eth.contract(
                         address=contract_address,
@@ -71,6 +77,60 @@ class FederatedLearningSDK:
             print(f"Warning: Could not initialize Web3: {e}")
             self.web3 = None
             self.contract = None
+    
+    def _get_account(self):
+        """
+        Get the account address to use for transactions.
+        
+        Returns:
+            str: Account address
+        """
+        if self.account_address:
+            return self.account_address
+        
+        # Fallback to using the first account (only works with unlocked accounts)
+        if self.web3 and self.web3.eth.accounts:
+            return self.web3.eth.accounts[0]
+        
+        raise ValueError("No account available. Please provide a private key via parameter or PRIVATE_KEY environment variable.")
+    
+    def _sign_and_send_transaction(self, function_call):
+        """
+        Sign a transaction with the private key and send it.
+        
+        Args:
+            function_call: Contract function call
+            
+        Returns:
+            str: Transaction hash
+        """
+        if not self.web3:
+            raise ConnectionError("Web3 not initialized")
+        
+        account_address = self._get_account()
+        
+        # If using private key, sign transaction
+        if self.private_key:
+            # Get transaction details
+            tx = function_call.build_transaction({
+                'from': account_address,
+                'nonce': self.web3.eth.get_transaction_count(account_address),
+                'gas': 10000000,  # Gas limit, adjust as needed
+                'gasPrice': self.web3.eth.gas_price
+            })
+            
+            # Sign transaction (private_key is an instance variable, not local)
+            signed_tx = self.web3.eth.account.sign_transaction(tx, self.private_key)
+            
+            # Send transaction
+            tx_hash = self.web3.eth.send_raw_transaction(signed_tx.raw_transaction)
+        else:
+            # If no private key, use default account (requires unlocked account)
+            tx_hash = function_call.transact({'from': account_address})
+        
+        # Wait for transaction to be mined
+        receipt = self.web3.eth.wait_for_transaction_receipt(tx_hash)
+        return receipt
     
     def upload(self, content, is_file=False, name=None):
         if self.provider == "ipfs":
@@ -285,17 +345,10 @@ class FederatedLearningSDK:
         # Upload schema to IPFS
         schema_hash = self.upload(schema, name=task_id)
         
-        # Get account to use
-        account = self.web3.eth.accounts[0]
-        
         # Create task on the blockchain
-        tx_hash = self.contract.functions.createTask(
-            task_id,
-            schema_hash
-        ).transact({'from': account})
-        
-        # Wait for transaction to be mined
-        receipt = self.web3.eth.wait_for_transaction_receipt(tx_hash)
+        receipt = self._sign_and_send_transaction(
+            self.contract.functions.createTask(task_id, schema_hash)
+        )
         
         return {
             "task_id": task_id,
@@ -425,6 +478,7 @@ class FederatedLearningSDK:
         Args:
             task_id (str): ID of the task to submit to
             model_weights_file (str): Path to the saved weights file (.h5)
+            accuracy (float): Model accuracy (0.0 to 1.0)
             
         Returns:
             str: Transaction hash
@@ -436,19 +490,15 @@ class FederatedLearningSDK:
         name = os.path.basename(model_weights_file)
         model_hash = self.upload(model_weights_file, is_file=True, name=name)
         
-        # Get account to use
-        account = self.web3.eth.accounts[0]
-        
         # Submit to blockchain
-        tx_hash = self.contract.functions.submitModel(
-            task_id,
-            model_hash,
-            name,
-            int(accuracy * 10000)
-        ).transact({'from': account})
-        
-        # Wait for transaction to be mined
-        receipt = self.web3.eth.wait_for_transaction_receipt(tx_hash)
+        receipt = self._sign_and_send_transaction(
+            self.contract.functions.submitModel(
+                task_id,
+                model_hash,
+                name,
+                int(accuracy * 10000)
+            )
+        )
         
         return receipt.transactionHash.hex()
     
@@ -459,6 +509,7 @@ class FederatedLearningSDK:
         Args:
             task_id (str): The task ID for which to submit the final model.
             final_model_weights_file (str): Path to the final aggregated model weights (.h5)
+            accuracy (float): Model accuracy (0.0 to 1.0)
 
         Returns:
             str: Transaction hash of the submission
@@ -469,19 +520,15 @@ class FederatedLearningSDK:
         # Upload final weights to IPFS
         final_model_hash = self.upload(final_model_weights_file, is_file=True, name=final_model_weights_file)
 
-        # Get the current account
-        account = self.web3.eth.accounts[0]
-
         # Submit the final model on-chain
-        tx_hash = self.contract.functions.submitFinalModel(
-            task_id,
-            final_model_hash,
-            final_model_weights_file,
-            int(accuracy * 10000)
-        ).transact({'from': account})
-
-        # Wait for the transaction to be mined
-        receipt = self.web3.eth.wait_for_transaction_receipt(tx_hash)
+        receipt = self._sign_and_send_transaction(
+            self.contract.functions.submitFinalModel(
+                task_id,
+                final_model_hash,
+                final_model_weights_file,
+                int(accuracy * 10000)
+            )
+        )
 
         return receipt.transactionHash.hex()
     
@@ -524,3 +571,4 @@ class FederatedLearningSDK:
             avg_weights.append(avg_layer_weights)
         
         return avg_weights
+    

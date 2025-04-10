@@ -37,9 +37,11 @@ import {
 import { ethers } from "ethers";
 import FederatedTaskManagerABI from "@/abi/FederatedTaskManager.json"; // Save ABI separately
 
-const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const CONTRACT_ADDRESS = "0x76C9284988B979f750BC504173ADc08E00c04398";
 
-const provider = new ethers.JsonRpcProvider("http://localhost:8545"); // Use appropriate network
+const provider = new ethers.JsonRpcProvider(
+  "https://rpc.ankr.com/filecoin_testnet"
+); // Use appropriate network
 const contract = new ethers.Contract(
   CONTRACT_ADDRESS,
   FederatedTaskManagerABI,
