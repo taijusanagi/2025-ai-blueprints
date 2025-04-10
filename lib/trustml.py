@@ -114,7 +114,7 @@ class FederatedLearningSDK:
             mime = mimetypes.types_map.get(ext, 'application/octet-stream')
             filename = name or os.path.basename(content)
         else:
-            filename = f"{name or 'file'}.json"
+            filename = name
             mime = "application/json"
 
         # Prepare file-like object
@@ -160,7 +160,7 @@ class FederatedLearningSDK:
         if self.provider == "ipfs":
             return self.download_from_ipfs(identifier, output_path)
         elif self.provider == "akave":
-            return self.download_from_akave(f"{name}.json", output_path)
+            return self.download_from_akave(name, output_path)
         else:
             raise ValueError(f"Unsupported provider: {self.provider}")
 
@@ -334,8 +334,9 @@ class FederatedLearningSDK:
                     for submission in task[4]:
                         task_data["submissions"].append({
                             "model_hash": submission[0],
-                            "submitter": submission[1],
-                            "timestamp": submission[2]
+                            "modelMetadata": submission[1],
+                            "submitter": submission[2],
+                            "timestamp": submission[3]
                         })
                 break
         
@@ -359,10 +360,11 @@ class FederatedLearningSDK:
         
         for i, submission in enumerate(task_data["submissions"]):
             model_hash = submission["model_hash"]
+            model_name = submission["modelMetadata"]
             temp_file = os.path.join(temp_dir, f"model_{i}.weights.h5")
             
             # Download model weights
-            self.download(model_hash, temp_file)
+            self.download(model_hash, model_name, temp_file)
             
             # Load weights and collect
             model.load_weights(temp_file)
@@ -431,7 +433,8 @@ class FederatedLearningSDK:
             raise ConnectionError("Web3 or contract not initialized")
         
         # Upload weights to IPFS
-        model_hash = self.upload(model_weights_file, is_file=True)
+        name = os.path.basename(model_weights_file)
+        model_hash = self.upload(model_weights_file, is_file=True, name=name)
         
         # Get account to use
         account = self.web3.eth.accounts[0]
@@ -440,6 +443,7 @@ class FederatedLearningSDK:
         tx_hash = self.contract.functions.submitModel(
             task_id,
             model_hash,
+            name,
             int(accuracy * 10000)
         ).transact({'from': account})
         
@@ -463,7 +467,7 @@ class FederatedLearningSDK:
             raise ConnectionError("Web3 or contract not initialized")
 
         # Upload final weights to IPFS
-        final_model_hash = self.upload_to_ipfs(final_model_weights_file, is_file=True)
+        final_model_hash = self.upload(final_model_weights_file, is_file=True, name=final_model_weights_file)
 
         # Get the current account
         account = self.web3.eth.accounts[0]
@@ -472,6 +476,7 @@ class FederatedLearningSDK:
         tx_hash = self.contract.functions.submitFinalModel(
             task_id,
             final_model_hash,
+            final_model_weights_file,
             int(accuracy * 10000)
         ).transact({'from': account})
 

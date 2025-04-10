@@ -25,6 +25,12 @@
         "internalType": "uint256",
         "name": "accuracy",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "finalModelMetadata",
+        "type": "string"
       }
     ],
     "name": "FinalModelSubmitted",
@@ -56,6 +62,12 @@
         "internalType": "uint256",
         "name": "accuracy",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "modelMetadata",
+        "type": "string"
       }
     ],
     "name": "ModelSubmitted",
@@ -138,6 +150,11 @@
                 "type": "string"
               },
               {
+                "internalType": "string",
+                "name": "modelMetadata",
+                "type": "string"
+              },
+              {
                 "internalType": "address",
                 "name": "submitter",
                 "type": "address"
@@ -160,6 +177,11 @@
           {
             "internalType": "string",
             "name": "finalModelHash",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "finalModelMetadata",
             "type": "string"
           },
           {
@@ -189,6 +211,11 @@
         "type": "string"
       },
       {
+        "internalType": "string",
+        "name": "finalModelMetadata",
+        "type": "string"
+      },
+      {
         "internalType": "uint256",
         "name": "accuracy",
         "type": "uint256"
@@ -209,6 +236,11 @@
       {
         "internalType": "string",
         "name": "modelHash",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "modelMetadata",
         "type": "string"
       },
       {
