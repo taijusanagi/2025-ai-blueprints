@@ -250,6 +250,96 @@ sdk.submit_final_model(task_id, agg_path, final_acc)
         </div>
       </section>
 
+      <section className="mt-24 md:mt-32 max-w-6xl w-full z-10 px-4 mx-auto">
+        <h3 className="text-3xl font-bold mb-10 text-white text-center">
+          Technical Deep Dive
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Filecoin Card */}
+          <Card className="group bg-slate-800/90 border border-slate-700/50 rounded-lg transition-all duration-300 ease-in-out hover:border-slate-600 hover:bg-slate-800 shadow-md hover:shadow-lg flex flex-col">
+            {" "}
+            {/* Added flex flex-col */}
+            <CardContent className="p-6 flex-grow">
+              {" "}
+              {/* Added flex-grow */}
+              <GitBranch
+                aria-hidden="true"
+                className="w-8 h-8 mb-4 text-cyan-400 group-hover:scale-110 transition-transform duration-300"
+              />
+              <h4 className="text-xl font-semibold text-white mb-3 transition-colors duration-300 group-hover:text-cyan-300">
+                Filecoin: Immutable Ledger
+              </h4>
+              <p className="text-slate-400 text-sm mb-3">
+                Filecoin provides the verifiable foundation. A smart contract
+                records metadata (participants, rounds) and **Content
+                Identifiers (CIDs)** pointing to proofs stored immutably on
+                Filecoin.
+              </p>
+              <ul className="list-disc list-outside text-slate-400 text-sm space-y-1 pl-5 mb-3">
+                <li>
+                  <span className="font-semibold text-slate-300">
+                    Proofs Include:
+                  </span>{" "}
+                  Hash of model update (integrity), participant's signature
+                  (authenticity).
+                </li>
+                <li>
+                  <span className="font-semibold text-slate-300">Benefit:</span>{" "}
+                  Creates a tamper-proof, verifiable audit trail for every
+                  contribution, enabling reproducible AI pipelines.
+                </li>
+              </ul>
+              <p className="text-slate-400 text-sm">
+                This complements federated learning's privacy by ensuring
+                process integrity and transparency.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Akave Card */}
+          <Card className="group bg-slate-800/90 border border-slate-700/50 rounded-lg transition-all duration-300 ease-in-out hover:border-slate-600 hover:bg-slate-800 shadow-md hover:shadow-lg flex flex-col">
+            {" "}
+            {/* Added flex flex-col */}
+            <CardContent className="p-6 flex-grow">
+              {" "}
+              {/* Added flex-grow */}
+              <DatabaseZap
+                aria-hidden="true"
+                className="w-8 h-8 mb-4 text-pink-400 group-hover:scale-110 transition-transform duration-300" // Changed color to pink
+              />
+              <h4 className="text-xl font-semibold text-white mb-3 transition-colors duration-300 group-hover:text-pink-300">
+                {" "}
+                {/* Changed hover color */}
+                Akave: Resilient Model Storage
+              </h4>
+              <p className="text-slate-400 text-sm mb-3">
+                Akave offers decentralized storage optimized for AI artifacts
+                like model weights and schemas, enhancing resilience and
+                availability.
+              </p>
+              <ul className="list-disc list-outside text-slate-400 text-sm space-y-1 pl-5 mb-3">
+                <li>
+                  <span className="font-semibold text-slate-300">
+                    Mechanism:
+                  </span>{" "}
+                  Uses content-addressing for data consistency. The SDK handles
+                  efficient uploads and downloads.
+                </li>
+                <li>
+                  <span className="font-semibold text-slate-300">Benefit:</span>{" "}
+                  Provides low-latency access needed for aggregation and bridges
+                  standard AI tools (TensorFlow) with robust Web3 storage.
+                </li>
+              </ul>
+              <p className="text-slate-400 text-sm">
+                This decouples AI workflows from centralized bottlenecks,
+                enabling more flexible and interoperable data pipelines.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
       {/* --- Footer --- */}
       <footer className="mt-28 md:mt-36 text-center text-sm text-slate-500 z-10 pb-8">
         Made for the Filecoin AI Blueprints Hackathon · &copy;{" "}

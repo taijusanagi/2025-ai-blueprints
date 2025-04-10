@@ -34,11 +34,11 @@ TrustML solves this by combining:
 
 ### Filecoin
 
-We used Filecoin to store cryptographic proofs of model updates and task metadata on-chain through a custom smart contract. Each participant’s model submission includes a hash stored on Filecoin, enabling verifiable and auditable federated learning. This aligns with the "Verifiable & Reproducible AI" challenge by ensuring provenance and reproducibility of each training round.
+We used Filecoin to store cryptographic proofs of model updates and task metadata on-chain through a custom smart contract. Each participant’s model submission includes a hash stored on Filecoin, enabling verifiable and auditable federated learning. This aligns with the "Verifiable & Reproducible AI" challenge by ensuring provenance and reproducibility of each training round. Federated learning allows each node to keep its dataset private, making it suitable for real-world use cases like healthcare, where sensitive data must remain local while still contributing to a shared global model.
 
 ### Akave
 
-We used Akave for decentralized storage of TensorFlow model weights and schemas, supporting fast retrieval for real-time training and aggregation. This usage addresses the "Interoperable AI Data Pipelines" challenge by bridging decentralized storage with standard AI workflows. Our SDK uploads model updates to Akave and retrieves them efficiently during aggregation, ensuring low-latency hot storage for ongoing learning sessions.
+We used Akave for decentralized storage of TensorFlow model weights and schemas, supporting fast retrieval for real-time training and aggregation. This addresses the "Interoperable AI Data Pipelines" challenge by bridging decentralized storage with standard AI workflows. Our SDK uploads model updates to Akave and retrieves them efficiently during aggregation, ensuring low-latency access to model data—ideal for live and distributed AI training environments.
 
 ### SDK
 
