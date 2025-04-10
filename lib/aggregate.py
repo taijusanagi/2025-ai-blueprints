@@ -44,7 +44,10 @@ def main():
     parser.add_argument("--task_id", required=True, help="Task ID to aggregate models from")
     parser.add_argument("--dataset", default="iris", choices=["iris", "wine", "breast_cancer"], 
                         help="Dataset to use for evaluation (default: iris)")
+    parser.add_argument("--provider", default="akave", help="Storage provider")
     parser.add_argument("--ipfs_api", default="/ip4/127.0.0.1/tcp/5001", help="IPFS API endpoint")
+    parser.add_argument("--akave_api_url", default="http://localhost:8000", help="Akave API URL")
+    parser.add_argument("--bucket_id", default="myBucket", help="Bucket ID for Akave")
     parser.add_argument("--filecoin_rpc", default="http://localhost:8545", help="Filecoin RPC endpoint")
     parser.add_argument("--contract_address", default="0x5FbDB2315678afecb367f032d93F642f64180aa3", 
                         help="Address of the deployed contract (default: local dev address)")
@@ -66,9 +69,10 @@ def main():
         contract_abi = json.load(f)
 
     sdk = FederatedLearningSDK(
-        provider="akave",
-
-        # ipfs_api=args.ipfs_api,
+        provider=args.provider,
+        ipfs_api=args.ipfs_api,
+        bucket_id=args.bucket_id,
+        akave_api_url=args.akave_api_url,
         filecoin_rpc=args.filecoin_rpc,
         contract_address=args.contract_address,
         contract_abi=contract_abi
