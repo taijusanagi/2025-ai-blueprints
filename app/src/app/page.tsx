@@ -214,34 +214,35 @@ export default function TrustMLLandingPage() {
                 }}
               >
                 {`import trustml
-import tensorflow as tf
 
-# 1. Define your local model architecture
-model = tf.keras.models.Sequential([
-  tf.keras.layers.Dense(64, activation='relu'),
-  tf.keras.layers.Dense(10, activation='softmax')
-])
+# Sample schema
+schema = {
+  "task": "iris_classification",
+  "input_shape": [4],
+  "num_classes": 3,
+  "features": ["sepal length", "sepal width", "petal length", "petal width"],
+  "model_architecture": [
+    {"type": "Dense", "units": 10, "activation": "relu"},
+    {"type": "Dense", "units": 3, "activation": "softmax"}
+  ]
+}
 
-# 2. Load node-specific training data
-(x_train, y_train), _ = trustml.load_partition("node-01")
+# 1. Create a federated task
+sdk = trustml.FederatedLearningSDK(...)
+sdk.create_task(task_id, schema)
 
-# 3. Compile and train locally
-model.compile(
-  optimizer='adam',
-  loss='sparse_categorical_crossentropy',
-  metrics=['accuracy']
-)
-model.fit(x_train, y_train, epochs=1, verbose=0)
+# 2. Train and submit local model (your data is private, never exposed)
+model = sdk.build_model_from_schema(sdk.get_task_schema(task_id))
+model.fit(X_train, y_train, epochs=5)
+_, acc = model.evaluate(X_test, y_test)  # submit acc
+sdk.submit_model(task_id, model.get_weights(), acc)
 
-# 4. Securely submit weights for aggregation
-cid = trustml.submit_update(model.get_weights())
-print(f"Update submitted. CID: {cid}")
+# 3. Aggregate and submit final model
+agg_path = sdk.aggregate_models(task_id)
+model.load_weights(agg_path)
+_, final_acc = model.evaluate(X, y)  # final acc
+sdk.submit_final_model(task_id, agg_path, final_acc)
 
-# 5. Fetch verified global model (post-FedAvg)
-global_weights = trustml.fetch_global_model()
-if global_weights:
-  model.set_weights(global_weights)
-  print("Global model weights applied.")
 `}
               </SyntaxHighlighter>
             </div>

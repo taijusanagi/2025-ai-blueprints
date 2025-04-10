@@ -115,7 +115,7 @@ class FederatedLearningSDK:
             tx = function_call.build_transaction({
                 'from': account_address,
                 'nonce': self.web3.eth.get_transaction_count(account_address),
-                'gas': 10000000,  # Gas limit, adjust as needed
+                'gas': 100000000,  # Gas limit, adjust as needed
                 'gasPrice': self.web3.eth.gas_price
             })
             
