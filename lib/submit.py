@@ -63,7 +63,8 @@ def main():
     
     # Initialize SDK
     sdk = FederatedLearningSDK(
-        ipfs_api=args.ipfs_api,
+        provider="akave",
+        # ipfs_api=args.ipfs_api,
         filecoin_rpc=args.filecoin_rpc,
         contract_address=args.contract_address,
         contract_abi=contract_abi

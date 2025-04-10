@@ -125,7 +125,7 @@ def main():
         provider="akave",
         # provider="ipfs",
         # ipfs_api=args.ipfs_api,
-        # filecoin_rpc=args.filecoin_rpc,
+        filecoin_rpc=args.filecoin_rpc,
         contract_address=args.contract_address,
         contract_abi=contract_abi
     )

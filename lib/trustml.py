@@ -146,6 +146,24 @@ class FederatedLearningSDK:
             print("Response Text:", response.text)
             raise Exception("Akave upload failed: Invalid JSON response")
 
+    def download(self, identifier, name, output_path=None):
+        """
+        Download content based on provider.
+
+        Args:
+            identifier (str): IPFS hash or filename depending on the provider.
+            output_path (str, optional): Path to save the file (for file-based downloads).
+
+        Returns:
+            bytes or str: Content of the file or path to the saved file.
+        """
+        if self.provider == "ipfs":
+            return self.download_from_ipfs(identifier, output_path)
+        elif self.provider == "akave":
+            return self.download_from_akave(f"{name}.json", output_path)
+        else:
+            raise ValueError(f"Unsupported provider: {self.provider}")
+
     def download_from_ipfs(self, content_hash, output_path=None):
         """
         Download content from IPFS.
@@ -169,6 +187,34 @@ class FederatedLearningSDK:
         else:
             # Return as data
             return self.ipfs_client.cat(content_hash)
+        
+    def download_from_akave(self, filename, output_path=None):
+        """
+        Download a file from Akave.
+
+        Args:
+            filename (str): The name of the file to download.
+            output_path (str, optional): Path to save the downloaded file.
+
+        Returns:
+            bytes or str: Content of the file or path to the saved file.
+        """
+        if not self.akave_api_url or not self.bucket_id:
+            raise ValueError("Akave API URL and bucket ID must be provided")
+
+        download_url = f"{self.akave_api_url}/buckets/{self.bucket_id}/files/{filename}/download"
+        response = requests.get(download_url)
+
+        if response.status_code != 200:
+            raise Exception(f"Failed to download file: {response.status_code}, {response.text}")
+
+        if output_path:
+            with open(output_path, 'wb') as f:
+                f.write(response.content)
+            return output_path
+        else:
+            return response.content
+
     
     # --- Common Operations ---
     def build_model_from_schema(self, schema):
@@ -300,7 +346,7 @@ class FederatedLearningSDK:
             raise ValueError(f"No submissions found for task {task_id}")
             
         # Get the schema to build the model
-        schema_json = self.download_from_ipfs(task_data["schema_hash"])
+        schema_json = self.download(task_data["schema_hash"], task_id)
         schema = json.loads(schema_json)
         
         # Build model from schema
@@ -316,7 +362,7 @@ class FederatedLearningSDK:
             temp_file = os.path.join(temp_dir, f"model_{i}.weights.h5")
             
             # Download model weights
-            self.download_from_ipfs(model_hash, temp_file)
+            self.download(model_hash, temp_file)
             
             # Load weights and collect
             model.load_weights(temp_file)
@@ -365,7 +411,7 @@ class FederatedLearningSDK:
             raise ValueError(f"Task {task_id} not found")
         
         # Get schema from IPFS
-        schema_json = self.download_from_ipfs(schema_hash)
+        schema_json = self.download(schema_hash, task_id)
         
         # Parse and return
         return json.loads(schema_json)
@@ -385,7 +431,7 @@ class FederatedLearningSDK:
             raise ConnectionError("Web3 or contract not initialized")
         
         # Upload weights to IPFS
-        model_hash = self.upload_to_ipfs(model_weights_file, is_file=True)
+        model_hash = self.upload(model_weights_file, is_file=True)
         
         # Get account to use
         account = self.web3.eth.accounts[0]
