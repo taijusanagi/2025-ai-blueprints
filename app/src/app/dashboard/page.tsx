@@ -238,18 +238,10 @@ const SessionDetail = ({
         {sessionData.name}
       </h1>
       <div className="ml-10 mt-1 text-sm text-slate-400">
-        Schema:{" "}
+        Schema CID:{" "}
         <code className="text-slate-300 font-mono">
           {shorten(sessionData.schemaHash, 10, 6)}
         </code>
-        <a
-          href={generateStorageLink(sessionData.schemaHash, "ipfs")}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="ml-4 text-cyan-400 hover:text-cyan-300 underline inline-flex items-center gap-1"
-        >
-          View Schema File <ExternalLink className="w-3 h-3" />
-        </a>
       </div>
 
       {/* Global Stats Section */}
@@ -285,17 +277,6 @@ const SessionDetail = ({
                   {shorten(sessionData.globalModelCID, 10, 6)}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-1">
-                <a
-                  href={generateStorageLink(sessionData.globalModelCID, "ipfs")}
-                  target="_blank"
-                  className="text-xs text-cyan-400 hover:text-cyan-300 underline flex items-center gap-1"
-                  rel="noopener noreferrer"
-                >
-                  View Model File
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-              </CardContent>
             </Card>
           </>
         )}
@@ -424,16 +405,8 @@ const SessionDetail = ({
                     </span>
                   </div>
                   <code className="block text-slate-500 font-mono text-xs break-all">
-                    {update.cid}
+                    {shorten(update.cid, 20, 19)}
                   </code>
-                  <a
-                    href={generateStorageLink(update.cid, "ipfs")}
-                    className="text-xs text-cyan-400 hover:text-cyan-300 underline flex items-center gap-1 mt-1"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View Model File <ExternalLink className="w-3 h-3" />
-                  </a>
                   <div className="flex justify-between items-center pt-2">
                     <span className="text-slate-400 flex items-center gap-2">
                       <Gauge className="w-4 h-4" /> Accuracy:
@@ -481,7 +454,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchTasksFromContract = async () => {
       try {
-        const taskList = await getTasks();
+        const taskList = (await getTasks()).reverse();
         console.log("Fetched tasks:", taskList);
 
         const sessions: SessionListItem[] = taskList.map((task: any) => ({
