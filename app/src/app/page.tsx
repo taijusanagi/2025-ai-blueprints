@@ -109,16 +109,16 @@ export default function TrustMLLandingPage() {
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mt-24 md:mt-32 max-w-6xl w-full z-10 px-4">
         {[
           {
-            icon: ShieldCheck,
-            title: "Verifiable Training",
-            description:
-              "Each model update is signed, cryptographically hashed, and anchored on-chain.",
-          },
-          {
             icon: GitBranch,
             title: "Federated Averaging",
             description:
               "Utilizes FedAvg algorithm to securely aggregate verified model contributions across nodes.",
+          },
+          {
+            icon: ShieldCheck,
+            title: "Verifiable Training with Privacy",
+            description:
+              "Each model update is hashed, signed, and anchored on-chain, all without sharing their raw data.",
           },
           {
             icon: DatabaseZap,
