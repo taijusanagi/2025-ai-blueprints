@@ -6,11 +6,13 @@ A verifiable, multi-node machine learning infrastructure that brings trust and d
 
 ## 🎯 Submission
 
-🎥 Demo video: [link to be added]
+🎥 Demo video: https://youtu.be/ITF6uEiu0w8
 
 🌐 Live App: https://2025-ai-blueprints.vercel.app/
 
 🧾 Filecoin Smart Contract: https://calibration.filfox.info/en/address/0x76C9284988B979f750BC504173ADc08E00c04398
+
+🧾 Akave Transaction: http://explorer.akave.ai/tx/0xac6903d6c0c9d94a2825e4780286868758aa7f66c547c0336e6f19179d4e988c
 
 ## 🔥 Project Summary
 
