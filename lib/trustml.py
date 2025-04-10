@@ -8,40 +8,47 @@ This module provides functionality to:
 """
 
 import json
+import io
 import os
 import time
 import ipfshttpclient
 from web3 import Web3
 import tensorflow as tf
 import numpy as np
+import requests
+import mimetypes
 
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.bool_):
+            return bool(obj)
+        return super(NumpyEncoder, self).default(obj)
 
 class FederatedLearningSDK:
     """Streamlined SDK for Federated Learning with IPFS and Filecoin integration."""
     
-    def __init__(self, ipfs_api="/ip4/127.0.0.1/tcp/5001", filecoin_rpc="http://localhost:8545", 
+    def __init__(self, provider="ipfs", bucket_id="myBucket", akave_api_url="http://localhost:8000",
+                 ipfs_api="/ip4/127.0.0.1/tcp/5001", filecoin_rpc="http://localhost:8545", 
                  contract_address=None, contract_abi=None):
-        """
-        Initialize the SDK with IPFS and Filecoin connection parameters.
-        
-        Args:
-            ipfs_api (str): IPFS API endpoint
-            filecoin_rpc (str): Filecoin RPC endpoint
-            contract_address (str): Address of the deployed smart contract
-            contract_abi (dict): ABI of the deployed smart contract
-        """
+        self.provider = provider
+        self.bucket_id = bucket_id
+        self.akave_api_url = akave_api_url
         self.ipfs_api = ipfs_api
-        self.filecoin_rpc = filecoin_rpc
-        self.contract_address = contract_address
-        self.contract_abi = contract_abi
         
         # Initialize connections
-        try:
-            self.ipfs_client = ipfshttpclient.connect(ipfs_api)
-            print("Connected to IPFS")
-        except Exception as e:
-            print(f"Warning: Could not connect to IPFS: {e}")
-            self.ipfs_client = None
+        if provider == "ipfs":
+            try:
+                self.ipfs_client = ipfshttpclient.connect(ipfs_api)
+                print("Connected to IPFS")
+            except Exception as e:
+                print(f"Warning: Could not connect to IPFS: {e}")
+                self.ipfs_client = None
             
         try:
             self.web3 = Web3(Web3.HTTPProvider(filecoin_rpc))
@@ -65,7 +72,13 @@ class FederatedLearningSDK:
             self.web3 = None
             self.contract = None
     
-    # --- IPFS Operations ---
+    def upload(self, content, is_file=False, name=None):
+        if self.provider == "ipfs":
+            return self.upload_to_ipfs(content, is_file)
+        elif self.provider == "akave":
+            return self.upload_to_akave(content, is_file, name)
+        else:
+            raise ValueError(f"Unsupported provider: {self.provider}")
     
     def upload_to_ipfs(self, content, is_file=False):
         """
@@ -90,7 +103,49 @@ class FederatedLearningSDK:
             if isinstance(content, dict):
                 content = json.dumps(content)
             return self.ipfs_client.add_str(content)
-    
+        
+    def upload_to_akave(self, content, is_file=False, name=None):
+        if not self.akave_api_url or not self.bucket_id:
+            raise ValueError("Akave API URL and bucket ID must be provided")
+
+        # Default filename and MIME type
+        if is_file:
+            ext = os.path.splitext(name or content)[1]
+            mime = mimetypes.types_map.get(ext, 'application/octet-stream')
+            filename = name or os.path.basename(content)
+        else:
+            filename = f"{name or 'file'}.json"
+            mime = "application/json"
+
+        # Prepare file-like object
+        if is_file:
+            file_data = open(content, 'rb')
+            files = {'file': (filename, file_data, mime)}
+        else:
+            if isinstance(content, dict):
+                content = json.dumps(content, cls=NumpyEncoder)
+            file_data = io.BytesIO(content.encode('utf-8'))
+            files = {'file': (filename, file_data, mime)}
+
+        try:
+            response = requests.post(
+                f"{self.akave_api_url}/buckets/{self.bucket_id}/files",
+                files=files
+            )
+        finally:
+            if is_file:
+                file_data.close()
+
+        try:
+            res_json = response.json()
+            if res_json.get("success") and "data" in res_json:
+                return res_json["data"]["RootCID"]
+            else:
+                raise Exception(f"Akave upload failed: {res_json}")
+        except ValueError:
+            print("Response Text:", response.text)
+            raise Exception("Akave upload failed: Invalid JSON response")
+
     def download_from_ipfs(self, content_hash, output_path=None):
         """
         Download content from IPFS.
@@ -182,7 +237,7 @@ class FederatedLearningSDK:
             task_id = f"task_{int(time.time())}"
         
         # Upload schema to IPFS
-        schema_hash = self.upload_to_ipfs(schema)
+        schema_hash = self.upload(schema, name=task_id)
         
         # Get account to use
         account = self.web3.eth.accounts[0]

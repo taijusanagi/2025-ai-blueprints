@@ -10,19 +10,6 @@ import numpy as np
 from sklearn.datasets import load_iris, load_wine, load_breast_cancer
 from trustml import FederatedLearningSDK
 
-# Custom JSON encoder to handle NumPy arrays
-class NumpyEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
-        if isinstance(obj, np.integer):
-            return int(obj)
-        if isinstance(obj, np.floating):
-            return float(obj)
-        if isinstance(obj, np.bool_):
-            return bool(obj)
-        return super(NumpyEncoder, self).default(obj)
-
 def get_dataset_info(dataset_name):
     """
     Get dataset information including feature names, input shape, and number of classes.
@@ -135,8 +122,10 @@ def main():
     
     # Initialize SDK
     sdk = FederatedLearningSDK(
-        ipfs_api=args.ipfs_api,
-        filecoin_rpc=args.filecoin_rpc,
+        provider="akave",
+        # provider="ipfs",
+        # ipfs_api=args.ipfs_api,
+        # filecoin_rpc=args.filecoin_rpc,
         contract_address=args.contract_address,
         contract_abi=contract_abi
     )
