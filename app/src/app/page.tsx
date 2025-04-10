@@ -271,9 +271,8 @@ sdk.submit_final_model(task_id, agg_path, final_acc)
               </h4>
               <p className="text-slate-400 text-sm mb-3">
                 Filecoin provides the verifiable foundation. A smart contract
-                records metadata (participants, rounds) and **Content
-                Identifiers (CIDs)** pointing to proofs stored immutably on
-                Filecoin.
+                records metadata (participants, rounds) and Content Identifiers
+                (CIDs) pointing to proofs stored immutably on Filecoin.
               </p>
               <ul className="list-disc list-outside text-slate-400 text-sm space-y-1 pl-5 mb-3">
                 <li>
