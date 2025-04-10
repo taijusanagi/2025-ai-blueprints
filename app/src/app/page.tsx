@@ -71,8 +71,11 @@ export default function TrustMLLandingPage() {
           <span className="text-pink-400">Decentralized</span> AI
         </h1>
         <p className="mt-6 text-lg md:text-xl text-slate-400 max-w-2xl mx-auto">
-          TrustML enables verifiable, multi-node machine learning model
-          training, secured by Filecoin and Akave.
+          TrustML is a verifiable, multi-node machine learning platform built on
+          <span className="text-white font-semibold"> Filecoin </span> and
+          <span className="text-white font-semibold"> Akave</span>, enabling
+          decentralized AI training with cryptographic integrity and secure
+          storage.
         </p>
         <div className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
           <Button

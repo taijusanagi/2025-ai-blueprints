@@ -1,6 +1,6 @@
 # TrustML
 
-Verifiable Federated Learning with Filecoin
+A verifiable, multi-node machine learning infrastructure that brings trust and decentralization to federated learning, powered by Filecoin and Akave.
 
 ![ogp](./app/public/ogp.png)
 
@@ -14,7 +14,9 @@ Verifiable Federated Learning with Filecoin
 
 ## 🔥 Project Summary
 
-TrustML is a verifiable federated learning platform powered by Filecoin and Akave. It enables trustable, decentralized machine learning by allowing multiple nodes to train locally, submit verifiable updates, and collaborate securely to build a global model.
+TrustML is an SDK and platform that enables multiple nodes to collaboratively train a machine learning model using TensorFlow and the Federated Averaging algorithm, all without sharing their raw data.
+
+This is especially powerful in real-world scenarios where data privacy is critical — such as healthcare, finance, or governance — where datasets cannot leave the local environment.
 
 ## 🌐 Problem
 
